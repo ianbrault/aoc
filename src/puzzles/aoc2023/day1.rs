@@ -48,7 +48,7 @@ fn last_digit(string: &str, matching_digit_strings: bool) -> Option<u32> {
 fn calibration_value(line: &str, matching_digit_strings: bool) -> u32 {
     let a = first_digit(line, matching_digit_strings).unwrap();
     let b = last_digit(line, matching_digit_strings).unwrap();
-    debug!("input: {}: first: {}: last: {}", line, a, b);
+    debug!("Input: {}: first: {}: last: {}", line, a, b);
     (a * 10) + b
 }
 

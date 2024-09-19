@@ -3,7 +3,8 @@
 */
 
 mod day1;
+mod day2;
 
 use crate::puzzle_set;
 
-puzzle_set!(day1);
+puzzle_set!(day1, day2);

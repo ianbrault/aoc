@@ -20,19 +20,6 @@ macro_rules! tail {
 }
 
 #[macro_export]
-macro_rules! count {
-    () => {
-        0
-    };
-    ($x:tt) => {
-        1
-    };
-    ($x:tt $($xx:tt),*) => {
-        count!($xx) + 1
-    };
-}
-
-#[macro_export]
 #[allow(clippy::crate_in_macro_def)]
 macro_rules! puzzle_modules {
     ($($year:expr; $module:ident),+) => {
@@ -54,7 +41,7 @@ macro_rules! puzzle_modules {
                 }
             }
 
-            pub fn dispatch(year: usize, day: usize) -> Box<dyn Fn(String) -> Solution> {
+            pub fn dispatch(year: usize, day: usize) -> fn(String) -> Solution {
                 match year {
                     $(
                         $year => $module::PuzzleSet::dispatch(day),
@@ -70,24 +57,27 @@ macro_rules! puzzle_modules {
 #[allow(clippy::crate_in_macro_def)]
 macro_rules! puzzle_set {
     ($($module:ident),+) => {
-        use crate::count;
         use crate::types::Solution;
 
         pub struct PuzzleSet {}
 
         impl PuzzleSet {
             pub fn count() -> usize {
-                count!($($module)*)
+                [
+                    $(
+                        $module::solve,
+                    )*
+                ].len()
             }
 
-            pub fn dispatch(day: usize) -> Box<dyn Fn(String) -> Solution> {
+            pub fn dispatch(day: usize) -> fn(String) -> Solution {
                 let puzzles = [
                     $(
                         $module::solve,
-                    ),*
+                    )*
                 ];
                 if day < puzzles.len() {
-                    Box::new(puzzles[day])
+                    puzzles[day]
                 } else {
                     panic!("PuzzleSet::dispatch: invalid day: {}", day)
                 }
