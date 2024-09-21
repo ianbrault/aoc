@@ -16,21 +16,13 @@ struct Game {
 }
 
 impl Game {
-    fn parse_game_id(string: &str) -> u32 {
-        let separator = string.find(" ").unwrap();
-        string[(separator + 1)..].parse().unwrap()
-    }
-
     fn power(&self) -> u32 {
         self.red_cubes * self.green_cubes * self.blue_cubes
     }
-}
 
-impl From<&str> for Game {
-    fn from(value: &str) -> Self {
+    fn from_string(id: u32, value: &str) -> Self {
         // ex: Game 1: 3 blue, 4 red; 1 red, 2 green, 6 blue; 2 green
         let separator = value.find(": ").unwrap();
-        let id = Self::parse_game_id(&value[..separator]);
         let cube_list = &value[(separator + 1)..];
 
         let mut red_cubes = 0;
@@ -73,7 +65,11 @@ pub fn solve(input: String) -> Solution {
     let mut solution = Solution::new();
     // Each game is listed with its ID number followed by a semicolon-separated list of subsets of
     // cubes that were revealed from the bag (like 3 red, 5 green, 4 blue)
-    let games = input.split("\n").map(Game::from).collect::<Vec<_>>();
+    let games = input
+        .split("\n")
+        .enumerate()
+        .map(|(id, line)| Game::from_string(id as u32 + 1, line))
+        .collect::<Vec<_>>();
 
     // Part A: Determine which games would have been possible if the bag had been loaded with only
     // 12 red cubes, 13 green cubes, and 14 blue cubes. What is the sum of the IDs of those games?

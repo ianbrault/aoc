@@ -6,6 +6,7 @@ use std::fs::File;
 use std::io::prelude::*;
 use std::io::{self, BufReader};
 use std::path::Path;
+use std::str::FromStr;
 
 /// reads the contents of a file into a string
 pub fn read_file(path: &Path) -> io::Result<String> {
@@ -14,4 +15,14 @@ pub fn read_file(path: &Path) -> io::Result<String> {
     let mut contents = String::new();
     buf_reader.read_to_string(&mut contents)?;
     Ok(contents)
+}
+
+/// splits a string by whitespace and parses the component parts into the given type
+pub fn split_and_parse<T>(string: &str) -> impl Iterator<Item = T> + '_
+where
+    T: FromStr,
+{
+    string
+        .split_whitespace()
+        .filter_map(|x| x.parse::<T>().ok())
 }
