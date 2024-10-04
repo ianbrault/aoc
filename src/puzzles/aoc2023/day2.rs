@@ -3,6 +3,7 @@
 */
 
 use super::Solution;
+use crate::utils;
 
 use log::debug;
 
@@ -22,8 +23,7 @@ impl Game {
 
     fn from_string(id: u32, value: &str) -> Self {
         // ex: Game 1: 3 blue, 4 red; 1 red, 2 green, 6 blue; 2 green
-        let separator = value.find(": ").unwrap();
-        let cube_list = &value[(separator + 1)..];
+        let cube_list = utils::split_tail(value, ": ").unwrap();
 
         let mut red_cubes = 0;
         let mut green_cubes = 0;

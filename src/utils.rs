@@ -26,3 +26,23 @@ where
         .split_ascii_whitespace()
         .filter_map(|x| x.parse::<T>().ok())
 }
+
+/// returns the head and tail of the string split at the first instance of the given pattern
+pub fn split<'a>(string: &'a str, after: &str) -> Option<(&'a str, &'a str)> {
+    if let Some(sep) = string.find(after) {
+        let a = &string[..sep];
+        let b = &string[(sep + after.len())..];
+        Some((a, b))
+    } else {
+        None
+    }
+}
+
+/// returns the tail of the string split at the first instance of the given pattern
+pub fn split_tail<'a>(string: &'a str, after: &str) -> Option<&'a str> {
+    if let Some(sep) = string.find(after) {
+        Some(&string[(sep + after.len())..])
+    } else {
+        None
+    }
+}

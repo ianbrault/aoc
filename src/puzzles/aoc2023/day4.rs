@@ -32,12 +32,8 @@ impl Card {
 
 impl From<&str> for Card {
     fn from(value: &str) -> Self {
-        let separator = value.find(":").unwrap();
-        let card_list = &value[(separator + 1)..];
-
-        let card_separator = card_list.find("|").unwrap();
-        let winning_number_string = &card_list[..card_separator];
-        let number_string = &card_list[(card_separator + 1)..];
+        let card_list = utils::split_tail(value, ":").unwrap();
+        let (winning_number_string, number_string) = utils::split(card_list, "|").unwrap();
 
         let winning_numbers = utils::split_and_parse(winning_number_string).collect();
         let numbers = utils::split_and_parse(number_string).collect();
