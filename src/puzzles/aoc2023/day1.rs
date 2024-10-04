@@ -2,9 +2,9 @@
 ** src/puzzles/aoc2023/day1.rs
 */
 
-use log::debug;
+use super::Solution;
 
-use crate::types::Solution;
+use log::debug;
 
 const DIGIT_STRINGS: [&str; 9] = [
     "one", "two", "three", "four", "five", "six", "seven", "eight", "nine",

@@ -3,6 +3,7 @@
 */
 
 mod driver;
+mod itertools;
 mod macros;
 mod puzzles;
 mod types;

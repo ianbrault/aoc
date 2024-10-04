@@ -2,9 +2,9 @@
 ** src/puzzles/aoc2023/day2.rs
 */
 
-use log::debug;
+use super::Solution;
 
-use crate::types::Solution;
+use log::debug;
 
 use std::cmp::max;
 

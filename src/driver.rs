@@ -2,8 +2,7 @@
 ** src/driver.rs
 */
 
-use crate::puzzles::{PuzzleIterator, PuzzleModules};
-use crate::types::{Answer, Puzzle};
+use crate::puzzles::{Answer, Puzzle, PuzzleIterator, PuzzleModules};
 use crate::utils;
 
 use log::{debug, info};

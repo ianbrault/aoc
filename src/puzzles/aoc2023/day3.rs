@@ -2,7 +2,8 @@
 ** src/puzzles/aoc2023/day3.rs
 */
 
-use crate::types::{Point, Solution};
+use super::Solution;
+use crate::types::Point;
 
 struct EngineNumber {
     id: u32,

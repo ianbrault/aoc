@@ -24,7 +24,6 @@ macro_rules! tail {
 macro_rules! puzzle_modules {
     ($($year:expr; $module:ident),+) => {
         use crate::{head, tail};
-        use crate::types::Solution;
 
         pub struct PuzzleModules {}
 
@@ -57,7 +56,7 @@ macro_rules! puzzle_modules {
 #[allow(clippy::crate_in_macro_def)]
 macro_rules! puzzle_set {
     ($($module:ident),+) => {
-        use crate::types::Solution;
+        use crate::puzzles::Solution;
 
         pub struct PuzzleSet {}
 

@@ -23,6 +23,6 @@ where
     T: FromStr,
 {
     string
-        .split_whitespace()
+        .split_ascii_whitespace()
         .filter_map(|x| x.parse::<T>().ok())
 }

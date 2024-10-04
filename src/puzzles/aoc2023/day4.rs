@@ -2,7 +2,7 @@
 ** src/puzzles/aoc2023/day4.rs
 */
 
-use crate::types::Solution;
+use super::Solution;
 use crate::utils;
 
 use std::collections::HashSet;
