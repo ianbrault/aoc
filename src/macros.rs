@@ -25,6 +25,8 @@ macro_rules! puzzle_modules {
     ($($year:expr; $module:ident),+) => {
         use crate::{head, tail};
 
+        $(mod $module;)*
+
         pub struct PuzzleModules {}
 
         impl PuzzleModules {
@@ -57,6 +59,8 @@ macro_rules! puzzle_modules {
 macro_rules! puzzle_set {
     ($($module:ident),+) => {
         use crate::puzzles::Solution;
+
+        $(mod $module;)*
 
         pub struct PuzzleSet {}
 

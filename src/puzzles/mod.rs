@@ -2,15 +2,11 @@
 ** src/puzzles/mod.rs
 */
 
-mod aoc2023;
-
-use crate::puzzle_modules;
-
-use std::fmt;
-
-puzzle_modules!(
+crate::puzzle_modules!(
     2023; aoc2023
 );
+
+use std::fmt;
 
 #[derive(Clone, Copy)]
 pub struct Puzzle {
@@ -100,6 +96,12 @@ impl From<u32> for Answer {
 impl From<u64> for Answer {
     fn from(n: u64) -> Self {
         Self::UInt(n)
+    }
+}
+
+impl From<usize> for Answer {
+    fn from(n: usize) -> Self {
+        Self::UInt(n as u64)
     }
 }
 

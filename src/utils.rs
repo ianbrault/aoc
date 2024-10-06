@@ -2,6 +2,7 @@
 ** src/utils.rs
 */
 
+use std::cmp;
 use std::fs::File;
 use std::io::prelude::*;
 use std::io::{self, BufReader};
@@ -45,4 +46,25 @@ pub fn split_tail<'a>(string: &'a str, after: &str) -> Option<&'a str> {
     } else {
         None
     }
+}
+
+/// greatest-common-divisor of 2 numbers
+pub fn gcd(x: u64, y: u64) -> u64 {
+    if x == y {
+        return x;
+    }
+
+    let mut a = cmp::max(x, y);
+    let mut b = cmp::min(x, y);
+    while b > 0 {
+        let temp = a;
+        a = b;
+        b = temp % b;
+    }
+    a
+}
+
+/// least-common-multiple of 2 numbers
+pub fn lcm(x: u64, y: u64) -> u64 {
+    x * (y / gcd(x, y))
 }
