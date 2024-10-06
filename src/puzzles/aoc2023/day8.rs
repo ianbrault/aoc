@@ -83,7 +83,7 @@ impl Map {
         // loop back to that same end node, so simply find each end node and the overall solution
         // is the least common multiple of each individual solution
         let start_nodes = self.nodes.keys().filter(|node| node.is_ghost_start()).collect::<Vec<_>>();
-        let mut steps_to_end_node = Vec::with_capacity(start_nodes.len());
+        let mut steps_to_end_node = Vec::<u64>::with_capacity(start_nodes.len());
 
         for start in start_nodes.into_iter() {
             let mut node = start;
@@ -97,6 +97,9 @@ impl Map {
                     break;
                 }
             }
+        }
+        if steps_to_end_node.len() == 1 {
+            return steps_to_end_node[0] as usize;
         }
 
         let mut steps_final = utils::lcm(steps_to_end_node[0], steps_to_end_node[1]);
