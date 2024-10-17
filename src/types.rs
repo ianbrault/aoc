@@ -3,8 +3,10 @@
 */
 
 use std::collections::HashMap;
+use std::fmt::Display;
 use std::hash::Hash;
 
+#[derive(Clone)]
 pub struct Point {
     pub x: i64,
     pub y: i64,
@@ -18,6 +20,70 @@ impl Point {
         Self {
             x: x.into(),
             y: y.into(),
+        }
+    }
+}
+
+impl Display for Point {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "({},{})", self.x, self.y)
+    }
+}
+
+pub struct Grid<T> {
+    pub width: usize,
+    pub height: usize,
+    inner: Vec<Vec<T>>,
+}
+
+impl<T> Grid<T> {
+    pub fn new(width: usize, height: usize) -> Self
+    where
+        T: Clone + Default,
+    {
+        let inner = vec![vec![T::default(); width]; height];
+        Self {
+            width,
+            height,
+            inner,
+        }
+    }
+
+    pub fn get(&self, i: usize, j: usize) -> &T {
+        &self.inner[i][j]
+    }
+
+    pub fn get_mut(&mut self, i: usize, j: usize) -> &mut T {
+        &mut self.inner[i][j]
+    }
+
+    pub fn set(&mut self, i: usize, j: usize, value: T) {
+        self.inner[i][j] = value;
+    }
+
+    pub fn iter_grid(&self) -> impl Iterator<Item = (usize, usize, &T)> {
+        self.inner
+            .iter()
+            .enumerate()
+            .flat_map(|(i, row)| row.iter().enumerate().map(move |(j, item)| (i, j, item)))
+    }
+}
+
+impl<T> From<Vec<Vec<T>>> for Grid<T>
+where
+    T: Clone + Default,
+{
+    fn from(mut value: Vec<Vec<T>>) -> Self {
+        let height = value.len();
+        // assert uniform width
+        let width = value.iter().map(|row| row.len()).max().unwrap_or(0);
+        for row in value.iter_mut().filter(|row| row.len() < width) {
+            row.extend_from_slice(vec![T::default(); width - row.len()].as_slice());
+        }
+        Self {
+            width,
+            height,
+            inner: value,
         }
     }
 }
