@@ -6,8 +6,6 @@ use super::Solution;
 use crate::types::Grid;
 use crate::utils;
 
-use std::collections::HashSet;
-
 #[derive(Clone, Default)]
 enum Space {
     #[default]
@@ -27,8 +25,8 @@ impl From<char> for Space {
 
 struct Image {
     galaxies: Vec<(usize, usize)>,
-    expanded_rows: HashSet<usize>,
-    expanded_cols: HashSet<usize>,
+    expanded_rows: Vec<usize>,
+    expanded_cols: Vec<usize>,
 }
 
 impl Image {
@@ -59,8 +57,8 @@ impl From<String> for Image {
         let data = value.split('\n').map(|line| line.chars().map(Space::from).collect::<Vec<_>>()).collect::<Vec<_>>();
         let grid = Grid::from(data);
 
-        let expanded_rows = (0..grid.height).filter(|&i| grid.iter_row(i).all(|space| matches!(space, Space::Empty))).collect::<HashSet<_>>();
-        let expanded_cols = (0..grid.width).filter(|&j| grid.iter_col(j).all(|space| matches!(space, Space::Empty))).collect::<HashSet<_>>();
+        let expanded_rows = (0..grid.height).filter(|&i| grid.iter_row(i).all(|space| matches!(space, Space::Empty))).collect();
+        let expanded_cols = (0..grid.width).filter(|&j| grid.iter_col(j).all(|space| matches!(space, Space::Empty))).collect();
 
         let mut galaxies = Vec::new();
         for (i, j, space) in grid.iter_grid() {
