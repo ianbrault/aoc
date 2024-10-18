@@ -68,3 +68,14 @@ pub fn gcd(x: u64, y: u64) -> u64 {
 pub fn lcm(x: u64, y: u64) -> u64 {
     x * (y / gcd(x, y))
 }
+
+/// sort 2 ordered items into a minimum and maximum
+pub fn min_max<T>(a: T, b: T) -> (T, T)
+where
+    T: Clone + Ord,
+{
+    (
+        cmp::min(a.clone(), b.clone()),
+        cmp::max(a.clone(), b.clone()),
+    )
+}

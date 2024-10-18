@@ -61,6 +61,14 @@ impl<T> Grid<T> {
         self.inner[i][j] = value;
     }
 
+    pub fn iter_row(&self, i: usize) -> impl Iterator<Item = &T> {
+        self.inner[i].iter()
+    }
+
+    pub fn iter_col(&self, j: usize) -> impl Iterator<Item = &T> {
+        (0..self.height).map(move |i| &self.inner[i][j])
+    }
+
     pub fn iter_grid(&self) -> impl Iterator<Item = (usize, usize, &T)> {
         self.inner
             .iter()
