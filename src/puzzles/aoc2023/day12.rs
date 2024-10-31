@@ -5,78 +5,47 @@
 use super::Solution;
 use crate::utils;
 
-use log::debug;
-
 use std::collections::HashMap;
-use std::fmt::Display;
 
-type Cache<'a> = HashMap<(&'a [SpringState], &'a [usize], usize), usize>;
-
-#[derive(Clone, Eq, Hash, PartialEq)]
-enum SpringState {
-    Operational,
-    Damaged,
-    Unknown,
-}
-
-impl From<char> for SpringState {
-    fn from(value: char) -> Self {
-        match value {
-            '.' => Self::Operational,
-            '#' => Self::Damaged,
-            '?' => Self::Unknown,
-            _ => panic!("SpringState::From<char>: invalid character: {}", value),
-        }
-    }
-}
-
-impl Display for SpringState {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "{}", match self {
-            Self::Operational => '.',
-            Self::Damaged => '#',
-            Self::Unknown => '?',
-        })
-    }
-}
+type Cache<'a> = HashMap<(&'a str, &'a [usize], usize), usize>;
 
 struct Record {
-    states: Vec<SpringState>,
+    states: String,
     springs: Vec<usize>,
 }
 
 impl Record {
-    fn arrangements_rec<'a>(cache: &mut Cache<'a>, states: &'a [SpringState], springs: &'a [usize], num_done_in_group: usize) -> usize {
+    fn arrangements_rec<'a>(cache: &mut Cache<'a>, states: &'a str, springs: &'a [usize], done_in_group: usize) -> usize {
         // check for cached solution
-        if let Some(&answer) = cache.get(&(states, springs, num_done_in_group)) {
+        if let Some(&answer) = cache.get(&(states, springs, done_in_group)) {
             return answer;
         }
         if states.is_empty() {
             // is this a valid solution?
-            let solutions = if springs.is_empty() && num_done_in_group == 0 {
+            let solutions = if springs.is_empty() && done_in_group == 0 {
                 1
             } else {
                 0
             };
-            cache.insert((states, springs, num_done_in_group), solutions);
+            cache.insert((states, springs, done_in_group), solutions);
             return solutions;
         }
 
         let mut solutions = 0;
-        let next_state = states.first().unwrap();
+        let next_state = states.chars().nth(0).unwrap();
         // branch on unknown state
-        let options = if matches!(next_state, SpringState::Unknown) {
-            vec![SpringState::Operational, SpringState::Damaged]
+        let options = if next_state == '?' {
+            vec!['.', '#']
         } else {
-            vec![next_state.clone()]
+            vec![next_state]
         };
         for state in options {
-            if matches!(state, SpringState::Damaged) {
+            if state == '#' {
                 // extend the current group
-                solutions += Self::arrangements_rec(cache, &states[1..], springs, num_done_in_group + 1);
-            } else if num_done_in_group > 0 {
+                solutions += Self::arrangements_rec(cache, &states[1..], springs, done_in_group + 1);
+            } else if done_in_group > 0 {
                 // if in a group and it can be closed, close it
-                if !springs.is_empty() && springs[0] == num_done_in_group {
+                if !springs.is_empty() && springs[0] == done_in_group {
                     solutions += Self::arrangements_rec(cache, &states[1..], &springs[1..], 0);
                 }
             } else {
@@ -84,32 +53,29 @@ impl Record {
                 solutions += Self::arrangements_rec(cache, &states[1..], springs, 0);
             }
         }
-        cache.insert((states, springs, num_done_in_group), solutions);
+        cache.insert((states, springs, done_in_group), solutions);
         solutions
     }
 
     fn arrangements(&self) -> usize {
-        debug!("record: {}", self);
         let mut cache = Cache::new();
         Self::arrangements_rec(&mut cache, &self.states, &self.springs, 0)
     }
 
     fn unfold(&self) -> Self {
         // note the EOF that was added to the states
-        let mut states = Vec::with_capacity(((self.states.len() - 1) * 5) + 1);
+        let mut states = String::with_capacity(((self.states.len() - 1) * 5) + 1);
         let mut springs = Vec::with_capacity(self.springs.len() * 5);
         for i in 0..5 {
-            for state in &self.states[..(self.states.len() - 1)] {
-                states.push(state.clone());
-            }
+            states += &self.states[..(self.states.len() - 1)];
             if i < 4 {
-                states.push(SpringState::Unknown);
+                states += "?";
             }
             for &spring in self.springs.iter() {
                 springs.push(spring);
             }
         }
-        states.push(SpringState::Operational);
+        states += ".";
 
         Self { states, springs }
     }
@@ -118,19 +84,11 @@ impl Record {
 impl From<&str> for Record {
     fn from(value: &str) -> Self {
         let (states_str, springs_str) = utils::split(value, " ").unwrap();
-        let mut states = states_str.chars().map(SpringState::from).collect::<Vec<_>>();
+        let mut states = states_str.into();
         // add an additional operational spring to the end to serve as an EOF
-        states.push(SpringState::Operational);
+        states += ".";
         let springs = springs_str.split(',').map(|s| s.parse().unwrap()).collect();
         Self { states, springs }
-    }
-}
-
-impl Display for Record {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        let states = self.states.iter().map(|state| format!("{}", state)).collect::<Vec<_>>();
-        let springs = self.springs.iter().map(|spring| format!("{}", spring)).collect::<Vec<_>>();
-        write!(f, "{} {}", states.join(""), springs.join(","))
     }
 }
 
