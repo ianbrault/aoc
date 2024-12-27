@@ -3,7 +3,8 @@
 */
 
 crate::puzzle_modules!(
-    2023; aoc2023
+    2023 => aoc2023,
+    2024 => aoc2024
 );
 
 use std::fmt;
@@ -38,7 +39,8 @@ impl PuzzleIterator {
         let (current_year, end_year) = if let Some(year) = year {
             (year, year + 1)
         } else {
-            (PuzzleModules::START_YEAR, PuzzleModules::END_YEAR)
+            let years = PuzzleModules::years();
+            (years[0], years[years.len() - 1] + 1)
         };
         Self {
             current_year,

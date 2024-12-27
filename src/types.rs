@@ -113,6 +113,10 @@ where
         }
     }
 
+    pub fn get(&self, element: &'a T) -> usize {
+        *self.counts.get(&element).unwrap_or(&0)
+    }
+
     pub fn add(&mut self, element: &'a T) {
         let entry = self.counts.entry(element).or_insert(0);
         *entry += 1;

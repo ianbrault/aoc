@@ -3,41 +3,23 @@
 */
 
 #[macro_export]
-macro_rules! head {
-    ($x:tt $($xx:tt),*) => {
-        $x
-    };
-}
-
-#[macro_export]
-macro_rules! tail {
-    ($x:tt) => {
-        $x
-    };
-    ($x:tt $($xx:tt),*) => {
-        tail!($xx)
-    };
-}
-
-#[macro_export]
 #[allow(clippy::crate_in_macro_def)]
 macro_rules! puzzle_modules {
-    ($($year:expr; $module:ident),+) => {
-        use crate::{head, tail};
-
+    ($($year:expr => $module:ident),+) => {
         $(mod $module;)*
 
         pub struct PuzzleModules {}
 
         impl PuzzleModules {
-            const START_YEAR: usize = head!($($year)*);
-            const END_YEAR: usize = tail!($($year)*) + 1;
+            fn years() -> Vec<usize> {
+                vec![$($year,)*]
+            }
 
             fn puzzle_count(year: usize) -> usize {
                 match year {
                     $(
                         $year => $module::PuzzleSet::count(),
-                    ),*
+                    )*
                     _ => panic!("PuzzleSet::puzzle_count_for_year: invalid year: {}", year),
                 }
             }
@@ -46,7 +28,7 @@ macro_rules! puzzle_modules {
                 match year {
                     $(
                         $year => $module::PuzzleSet::dispatch(day),
-                    ),*
+                    )*
                     _ => panic!("PuzzleSet::dispatch: invalid year: {}", year),
                 }
             }
