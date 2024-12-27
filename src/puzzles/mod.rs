@@ -45,7 +45,7 @@ impl PuzzleIterator {
         Self {
             current_year,
             end_year,
-            day,
+            day: day.map(|d| d - 1),
             current_day: 0,
         }
     }
