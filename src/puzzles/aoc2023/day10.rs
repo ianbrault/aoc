@@ -48,10 +48,22 @@ struct Tile {
 
 impl Tile {
     fn new(ty: TileType) -> Self {
-        let connects_north = matches!(ty, TileType::PipeVertical | TileType::Pipe90NE | TileType::Pipe90NW);
-        let connects_south = matches!(ty, TileType::PipeVertical | TileType::Pipe90SE | TileType::Pipe90SW);
-        let connects_east = matches!(ty, TileType::PipeHorizontal | TileType::Pipe90NE | TileType::Pipe90SE);
-        let connects_west = matches!(ty, TileType::PipeHorizontal | TileType::Pipe90NW | TileType::Pipe90SW);
+        let connects_north = matches!(
+            ty,
+            TileType::PipeVertical | TileType::Pipe90NE | TileType::Pipe90NW
+        );
+        let connects_south = matches!(
+            ty,
+            TileType::PipeVertical | TileType::Pipe90SE | TileType::Pipe90SW
+        );
+        let connects_east = matches!(
+            ty,
+            TileType::PipeHorizontal | TileType::Pipe90NE | TileType::Pipe90SE
+        );
+        let connects_west = matches!(
+            ty,
+            TileType::PipeHorizontal | TileType::Pipe90NW | TileType::Pipe90SW
+        );
         Self {
             ty,
             connects_north,
@@ -118,7 +130,10 @@ impl PipeMap {
 
 impl From<String> for PipeMap {
     fn from(value: String) -> Self {
-        let chars = value.split('\n').map(|line| line.chars().collect::<Vec<_>>()).collect::<Vec<_>>();
+        let chars = value
+            .split('\n')
+            .map(|line| line.chars().collect::<Vec<_>>())
+            .collect::<Vec<_>>();
         let width = chars.first().unwrap().len();
         let height = chars.len();
 
@@ -155,41 +170,64 @@ impl From<String> for PipeMap {
 fn get_expanded_pipe_map(pipe_map: &PipeMap, points: &[(usize, usize)]) -> PipeMap {
     // expand 3x
     let mut grid = Grid::<Tile>::new(pipe_map.grid.width * 3, pipe_map.grid.height * 3);
-    let start_point = ((pipe_map.start_point.0 * 3) + 1, (pipe_map.start_point.1 * 3) + 1);
+    let start_point = (
+        (pipe_map.start_point.0 * 3) + 1,
+        (pipe_map.start_point.1 * 3) + 1,
+    );
 
     for &(i, j) in points {
         let tile = pipe_map.grid.get(i, j);
         match tile.ty {
-            TileType::PipeVertical | TileType::Start if tile.connects_north && tile.connects_south => {
+            TileType::PipeVertical | TileType::Start
+                if tile.connects_north && tile.connects_south =>
+            {
                 grid.set(i * 3, (j * 3) + 1, Tile::new(TileType::PipeVertical));
                 grid.set((i * 3) + 1, (j * 3) + 1, Tile::new(TileType::PipeVertical));
                 grid.set((i * 3) + 2, (j * 3) + 1, Tile::new(TileType::PipeVertical));
-            },
-            TileType::PipeHorizontal | TileType::Start if tile.connects_east && tile.connects_west => {
+            }
+            TileType::PipeHorizontal | TileType::Start
+                if tile.connects_east && tile.connects_west =>
+            {
                 grid.set((i * 3) + 1, j * 3, Tile::new(TileType::PipeHorizontal));
-                grid.set((i * 3) + 1, (j * 3) + 1, Tile::new(TileType::PipeHorizontal));
-                grid.set((i * 3) + 1, (j * 3) + 2, Tile::new(TileType::PipeHorizontal));
-            },
+                grid.set(
+                    (i * 3) + 1,
+                    (j * 3) + 1,
+                    Tile::new(TileType::PipeHorizontal),
+                );
+                grid.set(
+                    (i * 3) + 1,
+                    (j * 3) + 2,
+                    Tile::new(TileType::PipeHorizontal),
+                );
+            }
             TileType::Pipe90NE | TileType::Start if tile.connects_north && tile.connects_east => {
                 grid.set(i * 3, (j * 3) + 1, Tile::new(TileType::PipeVertical));
                 grid.set((i * 3) + 1, (j * 3) + 1, Tile::new(TileType::Pipe90NE));
-                grid.set((i * 3) + 1, (j * 3) + 2, Tile::new(TileType::PipeHorizontal));
-            },
+                grid.set(
+                    (i * 3) + 1,
+                    (j * 3) + 2,
+                    Tile::new(TileType::PipeHorizontal),
+                );
+            }
             TileType::Pipe90NW | TileType::Start if tile.connects_north && tile.connects_west => {
                 grid.set(i * 3, (j * 3) + 1, Tile::new(TileType::PipeVertical));
                 grid.set((i * 3) + 1, (j * 3) + 1, Tile::new(TileType::Pipe90NW));
                 grid.set((i * 3) + 1, j * 3, Tile::new(TileType::PipeHorizontal));
-            },
+            }
             TileType::Pipe90SE | TileType::Start if tile.connects_south && tile.connects_east => {
                 grid.set((i * 3) + 2, (j * 3) + 1, Tile::new(TileType::PipeVertical));
                 grid.set((i * 3) + 1, (j * 3) + 1, Tile::new(TileType::Pipe90SE));
-                grid.set((i * 3) + 1, (j * 3) + 2, Tile::new(TileType::PipeHorizontal));
-            },
+                grid.set(
+                    (i * 3) + 1,
+                    (j * 3) + 2,
+                    Tile::new(TileType::PipeHorizontal),
+                );
+            }
             TileType::Pipe90SW | TileType::Start if tile.connects_south && tile.connects_west => {
                 grid.set((i * 3) + 2, (j * 3) + 1, Tile::new(TileType::PipeVertical));
                 grid.set((i * 3) + 1, (j * 3) + 1, Tile::new(TileType::Pipe90SW));
                 grid.set((i * 3) + 1, j * 3, Tile::new(TileType::PipeHorizontal));
-            },
+            }
             _ => {}
         }
     }
@@ -214,7 +252,10 @@ fn enclosed_area(pipe_map: &PipeMap, points: &[(usize, usize)]) -> usize {
         if matches!(pipe_map_large.grid.get(i, 0).ty, TileType::Ground) {
             queue.push_back((i, 0));
         }
-        if matches!(pipe_map_large.grid.get(i, pipe_map_large.grid.width - 1).ty, TileType::Ground) {
+        if matches!(
+            pipe_map_large.grid.get(i, pipe_map_large.grid.width - 1).ty,
+            TileType::Ground
+        ) {
             queue.push_back((i, pipe_map_large.grid.width - 1));
         }
     }
@@ -222,7 +263,13 @@ fn enclosed_area(pipe_map: &PipeMap, points: &[(usize, usize)]) -> usize {
         if matches!(pipe_map_large.grid.get(0, j).ty, TileType::Ground) {
             queue.push_back((0, j));
         }
-        if matches!(pipe_map_large.grid.get(pipe_map_large.grid.height - 1, j).ty, TileType::Ground) {
+        if matches!(
+            pipe_map_large
+                .grid
+                .get(pipe_map_large.grid.height - 1, j)
+                .ty,
+            TileType::Ground
+        ) {
             queue.push_back((pipe_map_large.grid.height - 1, j));
         }
     }

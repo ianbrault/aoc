@@ -15,7 +15,12 @@ struct Record {
 }
 
 impl Record {
-    fn arrangements_rec<'a>(cache: &mut Cache<'a>, states: &'a str, springs: &'a [usize], done_in_group: usize) -> usize {
+    fn arrangements_rec<'a>(
+        cache: &mut Cache<'a>,
+        states: &'a str,
+        springs: &'a [usize],
+        done_in_group: usize,
+    ) -> usize {
         // check for cached solution
         if let Some(&answer) = cache.get(&(states, springs, done_in_group)) {
             return answer;
@@ -42,7 +47,8 @@ impl Record {
         for state in options {
             if state == '#' {
                 // extend the current group
-                solutions += Self::arrangements_rec(cache, &states[1..], springs, done_in_group + 1);
+                solutions +=
+                    Self::arrangements_rec(cache, &states[1..], springs, done_in_group + 1);
             } else if done_in_group > 0 {
                 // if in a group and it can be closed, close it
                 if !springs.is_empty() && springs[0] == done_in_group {
@@ -101,7 +107,10 @@ pub fn solve(input: String) -> Solution {
 
     // Part A: For each row, count all of the different arrangements of operational and broken
     // springs that meet the given criteria. What is the sum of those counts?
-    let arrangements = records.iter().map(|record| record.arrangements()).sum::<usize>();
+    let arrangements = records
+        .iter()
+        .map(|record| record.arrangements())
+        .sum::<usize>();
     solution.set_part_a(arrangements);
 
     // Part B: When you examine the records, you discover that they were actually folded up this
@@ -110,7 +119,9 @@ pub fn solve(input: String) -> Solution {
     // springs with five copies of itself. Unfold your condition records; what is the new sum of
     // possible arrangement counts?
     let records_unfolded = records.iter().map(|record| record.unfold());
-    let arrangements_unfolded = records_unfolded.map(|record| record.arrangements()).sum::<usize>();
+    let arrangements_unfolded = records_unfolded
+        .map(|record| record.arrangements())
+        .sum::<usize>();
     solution.set_part_b(arrangements_unfolded);
 
     solution

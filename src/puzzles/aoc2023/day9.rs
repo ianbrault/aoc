@@ -47,17 +47,29 @@ pub fn solve(input: String) -> Solution {
     // You pull out your handy Oasis And Sand Instability Sensor and analyze your surroundings. The
     // OASIS produces a report of many values and how they are changing over time (your puzzle
     // input). Each line in the report contains the history of a single value.
-    let sequences = input.split('\n').map(|line| utils::split_and_parse::<i64>(line).collect::<Vec<_>>()).collect::<Vec<_>>();
-    let history = sequences.iter().map(|sequence| sequence_history(sequence)).collect::<Vec<_>>();
+    let sequences = input
+        .split('\n')
+        .map(|line| utils::split_and_parse::<i64>(line).collect::<Vec<_>>())
+        .collect::<Vec<_>>();
+    let history = sequences
+        .iter()
+        .map(|sequence| sequence_history(sequence))
+        .collect::<Vec<_>>();
 
     // Part A: Analyze your OASIS report and extrapolate the next value for each history. What is
     // the sum of these extrapolated values?
-    let history_sum_back = history.iter().map(|hist| extrapolate_value_back(hist)).sum::<i64>();
+    let history_sum_back = history
+        .iter()
+        .map(|hist| extrapolate_value_back(hist))
+        .sum::<i64>();
     solution.set_part_a(history_sum_back);
 
     // Part B: Analyze your OASIS report again, this time extrapolating the previous value for each
     // history. What is the sum of these extrapolated values?
-    let history_sum_front = history.iter().map(|hist| extrapolate_value_front(hist)).sum::<i64>();
+    let history_sum_front = history
+        .iter()
+        .map(|hist| extrapolate_value_front(hist))
+        .sum::<i64>();
     solution.set_part_b(history_sum_front);
 
     solution

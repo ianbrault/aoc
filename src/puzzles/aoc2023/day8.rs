@@ -82,7 +82,11 @@ impl Map {
         // from experimentation: all start nodes will hit an end node and will then continue to
         // loop back to that same end node, so simply find each end node and the overall solution
         // is the least common multiple of each individual solution
-        let start_nodes = self.nodes.keys().filter(|node| node.is_ghost_start()).collect::<Vec<_>>();
+        let start_nodes = self
+            .nodes
+            .keys()
+            .filter(|node| node.is_ghost_start())
+            .collect::<Vec<_>>();
         let mut steps_to_end_node = Vec::<u64>::with_capacity(start_nodes.len());
 
         for start in start_nodes.into_iter() {
@@ -93,7 +97,10 @@ impl Map {
                 steps += 1;
                 if node.is_ghost_end() {
                     steps_to_end_node.push(steps);
-                    debug!("start node {} reached end node {} in {} steps", start.0, node.0, steps);
+                    debug!(
+                        "start node {} reached end node {} in {} steps",
+                        start.0, node.0, steps
+                    );
                     break;
                 }
             }
@@ -117,10 +124,17 @@ impl From<String> for Map {
         let mut nodes = HashMap::new();
         for node_string in node_strings.split('\n') {
             let (source, targets) = utils::split(node_string, " = ").unwrap();
-            let (target_a, target_b) = utils::split(&targets[1..(targets.len() - 1)], ", ").unwrap();
-            nodes.insert(Node(source.into()), (Node(target_a.into()), Node(target_b.into())));
+            let (target_a, target_b) =
+                utils::split(&targets[1..(targets.len() - 1)], ", ").unwrap();
+            nodes.insert(
+                Node(source.into()),
+                (Node(target_a.into()), Node(target_b.into())),
+            );
         }
-        Self { instructions, nodes }
+        Self {
+            instructions,
+            nodes,
+        }
     }
 }
 

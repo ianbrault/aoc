@@ -41,8 +41,16 @@ impl Image {
                 let (i0, i1) = utils::min_max(ia, ib);
                 let (j0, j1) = utils::min_max(ja, jb);
                 // check how many expanded rows/columns are crossed
-                let rows = self.expanded_rows.iter().filter(|&&i| i > i0 && i < i1).count();
-                let cols = self.expanded_cols.iter().filter(|&&j| j > j0 && j < j1).count();
+                let rows = self
+                    .expanded_rows
+                    .iter()
+                    .filter(|&&i| i > i0 && i < i1)
+                    .count();
+                let cols = self
+                    .expanded_cols
+                    .iter()
+                    .filter(|&&j| j > j0 && j < j1)
+                    .count();
                 distances += (i1 - i0 - rows) + (j1 - j0 - cols);
                 expanded_crossed += rows + cols;
             }
@@ -54,11 +62,18 @@ impl Image {
 
 impl From<String> for Image {
     fn from(value: String) -> Self {
-        let data = value.split('\n').map(|line| line.chars().map(Space::from).collect::<Vec<_>>()).collect::<Vec<_>>();
+        let data = value
+            .split('\n')
+            .map(|line| line.chars().map(Space::from).collect::<Vec<_>>())
+            .collect::<Vec<_>>();
         let grid = Grid::from(data);
 
-        let expanded_rows = (0..grid.height).filter(|&i| grid.iter_row(i).all(|space| matches!(space, Space::Empty))).collect();
-        let expanded_cols = (0..grid.width).filter(|&j| grid.iter_col(j).all(|space| matches!(space, Space::Empty))).collect();
+        let expanded_rows = (0..grid.height)
+            .filter(|&i| grid.iter_row(i).all(|space| matches!(space, Space::Empty)))
+            .collect();
+        let expanded_cols = (0..grid.width)
+            .filter(|&j| grid.iter_col(j).all(|space| matches!(space, Space::Empty)))
+            .collect();
 
         let mut galaxies = Vec::new();
         for (i, j, space) in grid.iter_grid() {
@@ -67,7 +82,11 @@ impl From<String> for Image {
             }
         }
 
-        Self { galaxies, expanded_rows, expanded_cols }
+        Self {
+            galaxies,
+            expanded_rows,
+            expanded_cols,
+        }
     }
 }
 
