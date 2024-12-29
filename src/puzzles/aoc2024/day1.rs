@@ -3,16 +3,17 @@
 */
 
 use super::Solution;
+use crate::utils;
 use crate::types::Counter;
 
 fn parse_lists(input: String) -> (Vec<i64>, Vec<i64>) {
     let mut a = Vec::new();
     let mut b = Vec::new();
     for line in input.split('\n') {
-        match line.split_ascii_whitespace().collect::<Vec<_>>().as_slice() {
+        match utils::split_and_parse::<i64>(line).collect::<Vec<_>>().as_slice() {
             &[sa, sb] => {
-                a.push(sa.parse().unwrap());
-                b.push(sb.parse().unwrap());
+                a.push(sa);
+                b.push(sb);
             },
             _ => panic!("invalid line: {}", line),
         }
