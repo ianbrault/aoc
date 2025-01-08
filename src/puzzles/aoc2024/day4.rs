@@ -136,11 +136,7 @@ pub fn solve(input: String) -> Solution {
     // This word search allows words to be horizontal, vertical, diagonal, written backwards, or
     // even overlapping other words. It's a little unusual, though, as you don't merely need to
     // find one instance of XMAS - you need to find all of them.
-    let input_grid = input
-        .split('\n')
-        .map(|line| line.chars().collect::<Vec<_>>())
-        .collect::<Vec<_>>();
-    let grid = Grid::from(input_grid);
+    let grid = Grid::from(input);
 
     // Part A: Take a look at the little Elf's word search. How many times does XMAS appear?
     let xmas_words = xmas_count(&grid);

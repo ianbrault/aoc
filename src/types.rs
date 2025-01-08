@@ -75,6 +75,31 @@ impl<T> Grid<T> {
             .enumerate()
             .flat_map(|(i, row)| row.iter().enumerate().map(move |(j, item)| (i, j, item)))
     }
+
+    pub fn find(&self, element: &T) -> Option<(usize, usize)>
+    where
+        T: PartialEq,
+    {
+        for (i, j, x) in self.iter_grid() {
+            if x == element {
+                return Some((i, j));
+            }
+        }
+        None
+    }
+}
+
+impl<T> Clone for Grid<T>
+where
+    T: Clone,
+{
+    fn clone(&self) -> Self {
+        Self {
+            width: self.width,
+            height: self.height,
+            inner: self.inner.clone(),
+        }
+    }
 }
 
 impl<T> From<Vec<Vec<T>>> for Grid<T>
@@ -93,6 +118,16 @@ where
             height,
             inner: value,
         }
+    }
+}
+
+impl From<String> for Grid<char> {
+    fn from(value: String) -> Self {
+        let array = value
+            .split('\n')
+            .map(|line| line.chars().collect::<Vec<_>>())
+            .collect::<Vec<_>>();
+        Self::from(array)
     }
 }
 
