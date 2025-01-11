@@ -79,3 +79,16 @@ where
         cmp::max(a.clone(), b.clone()),
     )
 }
+
+/// sort 2 ordered items into a minimum and maximum, using the given key function
+pub fn min_max_by_key<T, F, K>(a: T, b: T, f: F) -> (T, T)
+where
+    T: Clone,
+    F: Fn(&T) -> K,
+    K: Ord,
+{
+    (
+        cmp::min_by_key(a.clone(), b.clone(), &f),
+        cmp::max_by_key(a.clone(), b.clone(), &f),
+    )
+}
