@@ -78,20 +78,20 @@ fn antinode_locations_resonant(
         for i in 0..(matches.len() - 1) {
             for j in (i + 1)..matches.len() {
                 debug!("antennae: {} and {}", matches[i].point, matches[j].point);
-                locations.insert(matches[i].point.clone());
-                locations.insert(matches[j].point.clone());
+                locations.insert(matches[i].point);
+                locations.insert(matches[j].point);
                 // sort antennae by j-coordinate for easier comparison
                 let (p0, p1) = utils::min_max_by_key(&matches[i].point, &matches[j].point, |p| p.y);
                 let (dx, dy) = (p1.x - p0.x, p1.y - p0.y);
                 let mut a0 = Point::new(p1.x + dx, p1.y + dy);
                 while a0.x >= 0 && a0.y >= 0 && a0.x < height && a0.y < width {
-                    locations.insert(a0.clone());
+                    locations.insert(a0);
                     a0.x += dx;
                     a0.y += dy;
                 }
                 let mut a1 = Point::new(p0.x - dx, p0.y - dy);
                 while a1.x >= 0 && a1.y >= 0 && a1.x < height && a1.y < width {
-                    locations.insert(a1.clone());
+                    locations.insert(a1);
                     a1.x -= dx;
                     a1.y -= dy;
                 }

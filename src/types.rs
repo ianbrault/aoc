@@ -6,7 +6,7 @@ use std::collections::HashMap;
 use std::fmt::Display;
 use std::hash::Hash;
 
-#[derive(Clone, PartialEq, Eq, Hash)]
+#[derive(Clone, Copy, PartialEq, Eq, Hash)]
 pub struct Point {
     pub x: i64,
     pub y: i64,
