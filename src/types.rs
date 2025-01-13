@@ -87,6 +87,19 @@ impl<T> Grid<T> {
         }
         None
     }
+
+    pub fn find_all(&self, element: &T) -> Vec<(usize, usize)>
+    where
+        T: PartialEq,
+    {
+        let mut indices = Vec::new();
+        for (i, j, x) in self.iter_grid() {
+            if x == element {
+                indices.push((i, j));
+            }
+        }
+        indices
+    }
 }
 
 impl<T> Clone for Grid<T>
