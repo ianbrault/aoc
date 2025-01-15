@@ -92,3 +92,8 @@ where
         cmp::max_by_key(a.clone(), b.clone(), &f),
     )
 }
+
+/// calculates the number of digits in the given integer value
+pub fn num_digits(n: u64) -> u32 {
+    n.checked_ilog10().unwrap_or(0) + 1
+}

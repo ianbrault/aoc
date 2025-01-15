@@ -89,10 +89,10 @@ enum HandType {
 }
 
 impl HandType {
-    fn from_card_counts(counter: Counter<'_, Card>) -> Self {
+    fn from_card_counts(counter: Counter<&Card>) -> Self {
         let sorted = counter.sorted().collect::<Vec<_>>();
-        let (_, &top_count) = sorted[0];
-        let (_, &next_count) = sorted.get(1).unwrap_or(&(&Card::Joker, &0));
+        let (_, top_count) = sorted[0];
+        let &(_, next_count) = sorted.get(1).unwrap_or(&(&&Card::Joker, 0));
         match top_count {
             5 => HandType::FiveOfAKind,
             4 => HandType::FourOfAKind,
@@ -200,8 +200,8 @@ impl JokerHand {
         let top_count = counter.top();
         let mut card_types = counter
             .sorted()
-            .filter(|(_, &count)| count == top_count)
-            .map(|(card_type, _)| card_type.clone())
+            .filter(|&(_, count)| count == top_count)
+            .map(|(&card_type, _)| card_type.clone())
             .collect::<Vec<_>>();
         card_types.sort();
         let card_type = card_types.last().map_or(Card::Ace, |card| card.clone());

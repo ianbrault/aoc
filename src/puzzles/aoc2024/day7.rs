@@ -12,8 +12,7 @@ struct Equation {
 
 impl Equation {
     fn concat(x: u64, y: u64) -> u64 {
-        let y_pow = y.checked_ilog10().unwrap_or(0) + 1;
-        (x * 10_u64.pow(y_pow)) + y
+        (x * 10_u64.pow(utils::num_digits(y))) + y
     }
 
     fn can_be_solved_rec(&self, total: u64, index: usize) -> bool {

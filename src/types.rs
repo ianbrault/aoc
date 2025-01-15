@@ -144,14 +144,14 @@ impl From<String> for Grid<char> {
     }
 }
 
-pub struct Counter<'a, T>
+pub struct Counter<T>
 where
     T: Hash + Eq,
 {
-    counts: HashMap<&'a T, usize>,
+    counts: HashMap<T, usize>,
 }
 
-impl<'a, T> Counter<'a, T>
+impl<T> Counter<T>
 where
     T: Hash + Eq,
 {
@@ -161,43 +161,47 @@ where
         }
     }
 
-    pub fn get(&self, element: &'a T) -> usize {
+    pub fn get(&self, element: T) -> usize {
         *self.counts.get(&element).unwrap_or(&0)
     }
 
-    pub fn add(&mut self, element: &'a T) {
+    pub fn add(&mut self, element: T) {
         let entry = self.counts.entry(element).or_insert(0);
         *entry += 1;
     }
 
-    pub fn add_many(&mut self, element: &'a T, count: usize) {
+    pub fn add_many(&mut self, element: T, count: usize) {
         let entry = self.counts.entry(element).or_insert(0);
         *entry += count;
     }
 
-    pub fn remove(&mut self, element: &'a T) -> Option<usize> {
-        self.counts.remove(element)
+    pub fn remove(&mut self, element: T) -> Option<usize> {
+        self.counts.remove(&element)
     }
 
-    pub fn sorted(&'a self) -> impl Iterator<Item = (&'a T, &'a usize)> {
-        let mut paired_list = self.counts.iter().map(|(&k, v)| (k, v)).collect::<Vec<_>>();
-        paired_list.sort_by_key(|(_, &v)| v);
+    pub fn sorted(&self) -> impl Iterator<Item = (&T, usize)> {
+        let mut paired_list = self.counts.iter().map(|(k, &v)| (k, v)).collect::<Vec<_>>();
+        paired_list.sort_by_key(|&(_, v)| v);
         paired_list.into_iter().rev()
     }
 
     pub fn top(&self) -> usize {
         let sorted = self.sorted().collect::<Vec<_>>();
-        sorted.first().map_or(0, |(_, &count)| count)
+        sorted.first().map_or(0, |&(_, count)| count)
+    }
+
+    pub fn iter(&self) -> impl Iterator<Item = (&T, &usize)> {
+        self.counts.iter()
     }
 }
 
-impl<'a, T> FromIterator<&'a T> for Counter<'a, T>
+impl<T> FromIterator<T> for Counter<T>
 where
     T: Hash + Eq,
 {
     fn from_iter<I>(iter: I) -> Self
     where
-        I: IntoIterator<Item = &'a T>,
+        I: IntoIterator<Item = T>,
     {
         let mut counter = Self::new();
         for element in iter {
