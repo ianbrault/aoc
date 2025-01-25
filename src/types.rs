@@ -6,7 +6,34 @@ use std::collections::HashMap;
 use std::fmt::Display;
 use std::hash::Hash;
 
-#[derive(Clone, Copy, PartialEq, Eq, Hash)]
+#[derive(Clone, Copy, Debug, Eq, Hash, PartialEq)]
+pub enum Direction {
+    North,
+    South,
+    East,
+    West,
+    NorthEast,
+    NorthWest,
+    SouthEast,
+    SouthWest,
+}
+
+impl Direction {
+    pub fn turn_90_clockwise(&self) -> Self {
+        match self {
+            Self::North => Self::East,
+            Self::East => Self::South,
+            Self::South => Self::West,
+            Self::West => Self::North,
+            Self::NorthEast => Self::SouthEast,
+            Self::NorthWest => Self::NorthEast,
+            Self::SouthEast => Self::SouthWest,
+            Self::SouthWest => Self::NorthWest,
+        }
+    }
+}
+
+#[derive(Clone, Copy, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
 pub struct Point {
     pub x: i64,
     pub y: i64,

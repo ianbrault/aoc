@@ -3,28 +3,9 @@
 */
 
 use super::Solution;
-use crate::types::Grid;
+use crate::types::{Direction, Grid};
 
 use std::collections::HashSet;
-
-#[derive(Clone, Copy, Eq, Hash, PartialEq)]
-enum Direction {
-    North,
-    South,
-    East,
-    West,
-}
-
-impl Direction {
-    fn turn(&self) -> Self {
-        match self {
-            Self::North => Self::East,
-            Self::East => Self::South,
-            Self::South => Self::West,
-            Self::West => Self::North,
-        }
-    }
-}
 
 fn next_point(
     map: &Grid<char>,
@@ -61,6 +42,7 @@ fn next_point(
                 None
             }
         }
+        _ => unreachable!(),
     }
 }
 
@@ -71,7 +53,7 @@ fn positions_visited(map: &Grid<char>) -> HashSet<(usize, usize)> {
     let mut positions = HashSet::new();
     while let Some(new_position) = next_point(map, position, direction) {
         if *map.get(new_position.0, new_position.1) == '#' {
-            direction = direction.turn();
+            direction = direction.turn_90_clockwise();
         } else {
             position = new_position;
             positions.insert(position);
@@ -99,7 +81,7 @@ fn obstruction_creates_loop(
                 return true;
             } else {
                 obstructions_hit.insert((new_position, direction));
-                direction = direction.turn();
+                direction = direction.turn_90_clockwise();
             }
         } else {
             position = new_position;
