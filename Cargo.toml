@@ -7,4 +7,5 @@ edition = "2021"
 case_iterable = "0.2.0"
 clap = { version = "4.5.17", features = ["derive"] }
 log = "0.4.22"
+nalgebra = "0.33"
 simplelog = "0.12.2"
