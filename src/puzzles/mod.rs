@@ -83,6 +83,12 @@ pub enum Answer {
     String(String),
 }
 
+impl From<i32> for Answer {
+    fn from(n: i32) -> Self {
+        Self::Int(n as i64)
+    }
+}
+
 impl From<i64> for Answer {
     fn from(n: i64) -> Self {
         Self::Int(n)

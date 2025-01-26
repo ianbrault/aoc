@@ -2,9 +2,14 @@
 ** src/types.rs
 */
 
+use super::utils;
+
+use anyhow::Error;
+
 use std::collections::HashMap;
 use std::fmt::Display;
 use std::hash::Hash;
+use std::ops::Add;
 
 #[derive(Clone, Copy, Debug, Eq, Hash, PartialEq)]
 pub enum Direction {
@@ -51,9 +56,31 @@ impl Point {
     }
 }
 
+impl Add for Point {
+    type Output = Self;
+
+    fn add(self, rhs: Self) -> Self::Output {
+        Self::new(self.x + rhs.x, self.y + rhs.y)
+    }
+}
+
 impl Display for Point {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         write!(f, "({},{})", self.x, self.y)
+    }
+}
+
+impl TryFrom<&str> for Point {
+    type Error = Error;
+
+    fn try_from(value: &str) -> Result<Self, Self::Error> {
+        if let Some((x_str, y_str)) = utils::split(value, ",") {
+            let x = x_str.parse::<i64>()?;
+            let y = y_str.parse::<i64>()?;
+            Result::Ok(Self::new(x, y))
+        } else {
+            Result::Err(Error::msg("missing comma"))
+        }
     }
 }
 
