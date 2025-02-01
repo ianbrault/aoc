@@ -24,6 +24,19 @@ pub enum Direction {
 }
 
 impl Direction {
+    pub fn grid_delta(&self) -> (i64, i64) {
+        match self {
+            Self::North => (-1, 0),
+            Self::South => (1, 0),
+            Self::East => (0, 1),
+            Self::West => (0, -1),
+            Self::NorthEast => (-1, 1),
+            Self::NorthWest => (-1, -1),
+            Self::SouthEast => (1, 1),
+            Self::SouthWest => (1, -1),
+        }
+    }
+
     pub fn turn_90_clockwise(&self) -> Self {
         match self {
             Self::North => Self::East,
@@ -45,13 +58,14 @@ pub struct Point {
 }
 
 impl Point {
-    pub fn new<T>(x: T, y: T) -> Self
-    where
-        T: Into<i64>,
-    {
+    pub fn new(x: i64, y: i64) -> Self {
+        Self { x, y }
+    }
+
+    pub fn new_for_grid(i: usize, j: usize) -> Self {
         Self {
-            x: x.into(),
-            y: y.into(),
+            x: i as i64,
+            y: j as i64,
         }
     }
 }
@@ -104,15 +118,51 @@ impl<T> Grid<T> {
     }
 
     pub fn get(&self, i: usize, j: usize) -> &T {
-        &self.inner[i][j]
+        let row = self.inner.get(i).unwrap_or_else(|| panic!(
+            "Grid::get: index out of bounds: i: {}: size: {}x{}",
+            i, self.width, self.height
+        ));
+        row.get(j).unwrap_or_else(|| panic!(
+            "Grid::get: index out of bounds: j: {}: size: {}x{}",
+            j, self.width, self.height
+        ))
     }
 
     pub fn get_mut(&mut self, i: usize, j: usize) -> &mut T {
-        &mut self.inner[i][j]
+        let row = self.inner.get_mut(i).unwrap_or_else(|| panic!(
+            "Grid::get_mut: index out of bounds: i: {}: size: {}x{}",
+            i, self.width, self.height
+        ));
+        row.get_mut(j).unwrap_or_else(|| panic!(
+            "Grid::get_mut: index out of bounds: j: {}: size: {}x{}",
+            j, self.width, self.height
+        ))
     }
 
     pub fn set(&mut self, i: usize, j: usize, value: T) {
-        self.inner[i][j] = value;
+        let row = self.inner.get_mut(i).unwrap_or_else(|| panic!(
+            "Grid::set: index out of bounds: i: {}: size: {}x{}",
+            i, self.width, self.height
+        ));
+        let col = row.get_mut(j).unwrap_or_else(|| panic!(
+            "Grid::set: index out of bounds: j: {}: size: {}x{}",
+            j, self.width, self.height
+        ));
+        *col = value;
+    }
+
+    pub fn neighbor(&self, i: usize, j: usize, direction: Direction) -> Option<(usize, usize)> {
+        let (di, dj) = direction.grid_delta();
+        let point = Point::new_for_grid(i, j) + Point::new(di, dj);
+        if point.x >= 0
+            && point.y >= 0
+            && point.x < self.height as i64
+            && point.y < self.width as i64
+        {
+            Some((point.x as usize, point.y as usize))
+        } else {
+            None
+        }
     }
 
     pub fn iter_row(&self, i: usize) -> impl Iterator<Item = &T> {
@@ -149,6 +199,19 @@ impl<T> Grid<T> {
         let mut indices = Vec::new();
         for (i, j, x) in self.iter_grid() {
             if x == element {
+                indices.push((i, j));
+            }
+        }
+        indices
+    }
+
+    pub fn find_all_with<P>(&self, predicate: P) -> Vec<(usize, usize)>
+    where
+        P: Fn(&T) -> bool,
+    {
+        let mut indices = Vec::new();
+        for (i, j, x) in self.iter_grid() {
+            if predicate(x) {
                 indices.push((i, j));
             }
         }
