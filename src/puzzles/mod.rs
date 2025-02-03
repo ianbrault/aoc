@@ -113,6 +113,12 @@ impl From<usize> for Answer {
     }
 }
 
+impl From<&usize> for Answer {
+    fn from(n: &usize) -> Self {
+        Self::UInt(*n as u64)
+    }
+}
+
 impl From<String> for Answer {
     fn from(n: String) -> Self {
         Self::String(n)

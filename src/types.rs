@@ -24,6 +24,16 @@ pub enum Direction {
 }
 
 impl Direction {
+    pub fn cardinal() -> impl Iterator<Item = Self> {
+        vec![
+            Direction::North,
+            Direction::South,
+            Direction::East,
+            Direction::West,
+        ]
+        .into_iter()
+    }
+
     pub fn grid_delta(&self) -> (i64, i64) {
         match self {
             Self::North => (-1, 0),
@@ -118,36 +128,48 @@ impl<T> Grid<T> {
     }
 
     pub fn get(&self, i: usize, j: usize) -> &T {
-        let row = self.inner.get(i).unwrap_or_else(|| panic!(
-            "Grid::get: index out of bounds: i: {}: size: {}x{}",
-            i, self.width, self.height
-        ));
-        row.get(j).unwrap_or_else(|| panic!(
-            "Grid::get: index out of bounds: j: {}: size: {}x{}",
-            j, self.width, self.height
-        ))
+        let row = self.inner.get(i).unwrap_or_else(|| {
+            panic!(
+                "Grid::get: index out of bounds: i: {}: size: {}x{}",
+                i, self.width, self.height
+            )
+        });
+        row.get(j).unwrap_or_else(|| {
+            panic!(
+                "Grid::get: index out of bounds: j: {}: size: {}x{}",
+                j, self.width, self.height
+            )
+        })
     }
 
     pub fn get_mut(&mut self, i: usize, j: usize) -> &mut T {
-        let row = self.inner.get_mut(i).unwrap_or_else(|| panic!(
-            "Grid::get_mut: index out of bounds: i: {}: size: {}x{}",
-            i, self.width, self.height
-        ));
-        row.get_mut(j).unwrap_or_else(|| panic!(
-            "Grid::get_mut: index out of bounds: j: {}: size: {}x{}",
-            j, self.width, self.height
-        ))
+        let row = self.inner.get_mut(i).unwrap_or_else(|| {
+            panic!(
+                "Grid::get_mut: index out of bounds: i: {}: size: {}x{}",
+                i, self.width, self.height
+            )
+        });
+        row.get_mut(j).unwrap_or_else(|| {
+            panic!(
+                "Grid::get_mut: index out of bounds: j: {}: size: {}x{}",
+                j, self.width, self.height
+            )
+        })
     }
 
     pub fn set(&mut self, i: usize, j: usize, value: T) {
-        let row = self.inner.get_mut(i).unwrap_or_else(|| panic!(
-            "Grid::set: index out of bounds: i: {}: size: {}x{}",
-            i, self.width, self.height
-        ));
-        let col = row.get_mut(j).unwrap_or_else(|| panic!(
-            "Grid::set: index out of bounds: j: {}: size: {}x{}",
-            j, self.width, self.height
-        ));
+        let row = self.inner.get_mut(i).unwrap_or_else(|| {
+            panic!(
+                "Grid::set: index out of bounds: i: {}: size: {}x{}",
+                i, self.width, self.height
+            )
+        });
+        let col = row.get_mut(j).unwrap_or_else(|| {
+            panic!(
+                "Grid::set: index out of bounds: j: {}: size: {}x{}",
+                j, self.width, self.height
+            )
+        });
         *col = value;
     }
 
