@@ -187,6 +187,12 @@ impl<T> Grid<T> {
         }
     }
 
+    pub fn neighbors(&self, i: usize, j: usize) -> Vec<(usize, usize)> {
+        Direction::cardinal()
+            .filter_map(|direction| self.neighbor(i, j, direction))
+            .collect::<Vec<_>>()
+    }
+
     pub fn iter_row(&self, i: usize) -> impl Iterator<Item = &T> {
         self.inner[i].iter()
     }
@@ -280,6 +286,18 @@ impl From<String> for Grid<char> {
             .map(|line| line.chars().collect::<Vec<_>>())
             .collect::<Vec<_>>();
         Self::from(array)
+    }
+}
+
+impl Display for Grid<char> {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        for (i, j, c) in self.iter_grid() {
+            if j == 0 && i > 0 {
+                writeln!(f)?;
+            }
+            write!(f, "{}", c)?;
+        }
+        writeln!(f)
     }
 }
 
