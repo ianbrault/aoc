@@ -6,7 +6,8 @@ use super::utils;
 
 use anyhow::Error;
 
-use std::collections::HashMap;
+use std::cmp::Ordering;
+use std::collections::{BinaryHeap, HashMap};
 use std::fmt::Display;
 use std::hash::Hash;
 use std::ops::Add;
@@ -57,6 +58,19 @@ impl Direction {
             Self::NorthWest => Self::NorthEast,
             Self::SouthEast => Self::SouthWest,
             Self::SouthWest => Self::NorthWest,
+        }
+    }
+
+    pub fn turn_90_counterclockwise(&self) -> Self {
+        match self {
+            Self::North => Self::West,
+            Self::West => Self::South,
+            Self::South => Self::East,
+            Self::East => Self::North,
+            Self::NorthEast => Self::NorthWest,
+            Self::NorthWest => Self::SouthWest,
+            Self::SouthWest => Self::SouthEast,
+            Self::SouthEast => Self::NorthEast,
         }
     }
 }
@@ -125,6 +139,14 @@ impl<T> Grid<T> {
             height,
             inner,
         }
+    }
+
+    pub fn distance(from: (usize, usize), to: (usize, usize)) -> usize {
+        let (ai, aj) = from;
+        let (bi, bj) = to;
+        let di = (bi as i64 - ai as i64).unsigned_abs();
+        let dj = (bj as i64 - aj as i64).unsigned_abs();
+        (di + dj) as usize
     }
 
     pub fn get(&self, i: usize, j: usize) -> &T {
@@ -298,6 +320,89 @@ impl Display for Grid<char> {
             write!(f, "{}", c)?;
         }
         writeln!(f)
+    }
+}
+
+pub type Maze = Grid<char>;
+
+impl Maze {
+    pub fn create(width: usize, height: usize) -> Self {
+        Self::from(vec![vec!['.'; width]; height])
+    }
+
+    pub fn is_wall(&self, i: usize, j: usize) -> bool {
+        self.get(i, j) == &'#'
+    }
+
+    pub fn distance_matrix(&self, start: (usize, usize)) -> Grid<usize> {
+        let mut distances = Grid::from(vec![vec![usize::MAX; self.width]; self.height]);
+        let mut heap = BinaryHeap::new();
+
+        distances.set(start.0, start.1, 0);
+        heap.push(SearchState {
+            position: start,
+            cost: 0,
+        });
+
+        while let Some(SearchState {
+            position: (i, j),
+            cost,
+        }) = heap.pop()
+        {
+            let distance = distances.get(i, j);
+            if *distance < cost {
+                continue;
+            }
+            for (ii, jj) in self.neighbors(i, j) {
+                if self.is_wall(ii, jj) {
+                    continue;
+                }
+                let next_distance = distances.get_mut(ii, jj);
+                if *next_distance > cost + 1 {
+                    *next_distance = cost + 1;
+                    heap.push(SearchState {
+                        position: (ii, jj),
+                        cost: cost + 1,
+                    });
+                }
+            }
+        }
+        distances
+    }
+
+    #[allow(unused)]
+    pub fn to_csv(&self) -> String {
+        let mut rows = Vec::with_capacity(self.height);
+        for i in 0..self.height {
+            let row = self
+                .iter_row(i)
+                .map(|c| c.to_string())
+                .collect::<Vec<_>>()
+                .join(",");
+            rows.push(row);
+        }
+        rows.join("\n")
+    }
+}
+
+#[derive(Clone, Eq, PartialEq)]
+pub struct SearchState {
+    position: (usize, usize),
+    cost: usize,
+}
+
+impl Ord for SearchState {
+    fn cmp(&self, other: &Self) -> Ordering {
+        other
+            .cost
+            .cmp(&self.cost)
+            .then_with(|| self.position.cmp(&other.position))
+    }
+}
+
+impl PartialOrd for SearchState {
+    fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
+        Some(self.cmp(other))
     }
 }
 

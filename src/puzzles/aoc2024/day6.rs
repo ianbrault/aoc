@@ -7,51 +7,12 @@ use crate::types::{Direction, Grid};
 
 use std::collections::HashSet;
 
-fn next_point(
-    map: &Grid<char>,
-    from: (usize, usize),
-    direction: Direction,
-) -> Option<(usize, usize)> {
-    let (i, j) = from;
-    match direction {
-        Direction::North => {
-            if i > 0 {
-                Some((i - 1, j))
-            } else {
-                None
-            }
-        }
-        Direction::South => {
-            if i < map.height - 1 {
-                Some((i + 1, j))
-            } else {
-                None
-            }
-        }
-        Direction::East => {
-            if j < map.width - 1 {
-                Some((i, j + 1))
-            } else {
-                None
-            }
-        }
-        Direction::West => {
-            if j > 0 {
-                Some((i, j - 1))
-            } else {
-                None
-            }
-        }
-        _ => unreachable!(),
-    }
-}
-
 fn positions_visited(map: &Grid<char>) -> HashSet<(usize, usize)> {
     let mut position = map.find(&'^').unwrap();
     let mut direction = Direction::North;
 
     let mut positions = HashSet::new();
-    while let Some(new_position) = next_point(map, position, direction) {
+    while let Some(new_position) = map.neighbor(position.0, position.1, direction) {
         if *map.get(new_position.0, new_position.1) == '#' {
             direction = direction.turn_90_clockwise();
         } else {
@@ -74,7 +35,7 @@ fn obstruction_creates_loop(
     let mut direction = Direction::North;
     let mut obstructions_hit = HashSet::new();
 
-    while let Some(new_position) = next_point(&map, position, direction) {
+    while let Some(new_position) = map.neighbor(position.0, position.1, direction) {
         if *map.get(new_position.0, new_position.1) == '#' {
             // barrier hit, check if it has been hit in this direction before
             if obstructions_hit.contains(&(new_position, direction)) {
