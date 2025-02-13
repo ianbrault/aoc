@@ -70,3 +70,10 @@ macro_rules! puzzle_set {
         }
     };
 }
+
+#[macro_export]
+macro_rules! hash_map {
+    ($($k: expr => $v:expr),* $(,)?) => {
+        std::collections::HashMap::from([$(($k, $v),)*])
+    };
+}
