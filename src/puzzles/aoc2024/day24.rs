@@ -235,7 +235,6 @@ fn incorrect_wires<'a>(device: &'a Device) -> Vec<&'a Connection<'a>> {
         }
     }
 
-    dbg!(&incorrect);
     incorrect.into_iter().collect()
 }
 

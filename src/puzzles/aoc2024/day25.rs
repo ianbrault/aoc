@@ -4,8 +4,6 @@
 
 use super::Solution;
 
-use log::debug;
-
 use std::fmt;
 
 enum SchematicType {
@@ -79,12 +77,6 @@ pub fn solve(input: String) -> Solution {
             if Schematic::fits(lock, key) {
                 combos += 1;
             }
-            debug!(
-                "{:?} + {:?} fits: {}",
-                &lock,
-                &key,
-                Schematic::fits(lock, key)
-            );
         }
     }
     solution.set_part_a(combos);
