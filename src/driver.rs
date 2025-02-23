@@ -17,7 +17,7 @@ fn load_input(puzzle: Puzzle, sample: bool) -> String {
     let prefix = if sample { "sample" } else { "full" };
     let local_path = Path::new("input")
         .join(puzzle.year.to_string())
-        .join(format!("{}.{}.txt", prefix, puzzle.day + 1));
+        .join(format!("{}/{}.txt", prefix, puzzle.day + 1));
     let full_path = Path::new(PROJECT_DIR).join(&local_path);
     debug!(
         "Loading {} input from: {}",
