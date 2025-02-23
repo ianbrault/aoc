@@ -1,6 +1,6 @@
 # Advent of Code solutions
 
-Written in Rust
+https://adventofcode.com written in Rust
 
 ## Results
 
