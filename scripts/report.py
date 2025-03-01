@@ -25,7 +25,7 @@ def parse_output(proc: subprocess.CompletedProcess, results: collections.default
 
 def render(results: collections.defaultdict):
     years = set(y for y, _ in results.keys())
-    for year in sorted(years):
+    for year in reversed(sorted(years)):
         puzzles = set(p for y, p in results.keys() if y == year)
         icon = "✅" if len(puzzles) == 25 else "📝"
         print(f"### {year} ({len(puzzles)}/25 {icon})\n")
