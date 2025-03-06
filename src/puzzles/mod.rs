@@ -3,12 +3,11 @@
 */
 
 crate::puzzle_modules!(
+    2021 => aoc2021,
     2022 => aoc2022,
     2023 => aoc2023,
     2024 => aoc2024
 );
-
-use std::fmt;
 
 #[derive(Clone, Copy)]
 pub struct Puzzle {
@@ -22,8 +21,8 @@ impl Puzzle {
     }
 }
 
-impl fmt::Display for Puzzle {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+impl std::fmt::Display for Puzzle {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         write!(f, "AOC {} puzzle {}", self.year, self.day + 1)
     }
 }
@@ -132,8 +131,8 @@ impl From<String> for Answer {
     }
 }
 
-impl fmt::Display for Answer {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+impl std::fmt::Display for Answer {
+    fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
         match self {
             Self::Int(x) => write!(f, "{}", x),
             Self::UInt(x) => write!(f, "{}", x),

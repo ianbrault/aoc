@@ -9,7 +9,6 @@ use crate::utils;
 use log::debug;
 
 use std::cmp::Ordering;
-use std::fmt::Debug;
 
 const HAND_SIZE: usize = 5;
 
@@ -52,7 +51,7 @@ impl From<char> for Card {
     }
 }
 
-impl Debug for Card {
+impl std::fmt::Debug for Card {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         write!(
             f,
@@ -173,7 +172,7 @@ impl From<&str> for Hand {
     }
 }
 
-impl Debug for Hand {
+impl std::fmt::Debug for Hand {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         let card_strings = self
             .cards
@@ -197,7 +196,7 @@ impl JokerHand {
         let joker_count = counter.remove(&Card::Joker).unwrap_or(0);
 
         // check what the best card is
-        let top_count = counter.top();
+        let top_count = counter.max();
         let mut card_types = counter
             .sorted()
             .filter(|&(_, count)| count == top_count)
@@ -264,7 +263,7 @@ impl From<&str> for JokerHand {
     }
 }
 
-impl Debug for JokerHand {
+impl std::fmt::Debug for JokerHand {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         let card_strings = self
             .cards

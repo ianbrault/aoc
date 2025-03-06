@@ -4,8 +4,6 @@
 
 use super::Solution;
 
-use std::fmt;
-
 enum SchematicType {
     Lock,
     Key,
@@ -27,8 +25,8 @@ impl Schematic {
     }
 }
 
-impl fmt::Debug for Schematic {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+impl std::fmt::Debug for Schematic {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         let parts = self
             .heights
             .iter()

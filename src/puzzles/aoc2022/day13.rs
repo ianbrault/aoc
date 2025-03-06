@@ -8,7 +8,6 @@ use crate::itertools::*;
 use log::debug;
 
 use std::cmp;
-use std::fmt;
 
 #[derive(Clone, Debug, Eq, PartialEq)]
 enum PacketData {
@@ -196,8 +195,8 @@ impl From<&str> for PacketData {
     }
 }
 
-impl fmt::Display for PacketData {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+impl std::fmt::Display for PacketData {
+    fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
         match self {
             Self::Integer(int) => write!(f, "{}", int),
             Self::List(list) => {

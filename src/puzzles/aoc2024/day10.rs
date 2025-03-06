@@ -73,15 +73,10 @@ pub fn solve(input: String) -> Solution {
     let mut solution = Solution::new();
     // The reindeer brings you a blank topographic map of the surrounding area. The topographic map
     // indicates the height at each position using a scale from 0 (lowest) to 9 (highest).
-    let points = input
+    let map = input
         .split('\n')
-        .map(|line| {
-            line.chars()
-                .map(|c| c.to_digit(10).unwrap())
-                .collect::<Vec<_>>()
-        })
-        .collect::<Vec<_>>();
-    let map = Grid::from(points);
+        .map(|line| line.chars().map(|c| c.to_digit(10).unwrap()))
+        .collect::<Grid<_>>();
     let trailheads = map.find_all(&0);
 
     // Part A: What is the sum of the scores of all trailheads on your topographic map?

@@ -62,11 +62,10 @@ impl Image {
 
 impl From<String> for Image {
     fn from(value: String) -> Self {
-        let data = value
+        let grid = value
             .split('\n')
-            .map(|line| line.chars().map(Space::from).collect::<Vec<_>>())
-            .collect::<Vec<_>>();
-        let grid = Grid::from(data);
+            .map(|line| line.chars().map(Space::from))
+            .collect::<Grid<_>>();
 
         let expanded_rows = (0..grid.height)
             .filter(|&i| grid.iter_row(i).all(|space| matches!(space, Space::Empty)))

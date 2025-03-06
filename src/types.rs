@@ -5,14 +5,14 @@
 use super::utils;
 
 use anyhow::Error;
+use case_iterable::CaseIterable;
+use nalgebra::{Matrix2, Vector2};
 
-use std::cmp::Ordering;
+use std::cmp::{self, Ordering};
 use std::collections::{BinaryHeap, HashMap};
-use std::fmt::Display;
 use std::hash::Hash;
-use std::ops::{Add, Sub};
 
-#[derive(Clone, Copy, Debug, Eq, Hash, PartialEq)]
+#[derive(CaseIterable, Clone, Copy, Debug, Eq, Hash, PartialEq)]
 pub enum Direction {
     North,
     South,
@@ -97,14 +97,30 @@ impl Point {
         }
     }
 
-    pub fn manhattan_distance(point_a: Self, point_b: Self) -> i64 {
-        let dx = point_a.x - point_b.x;
-        let dy = point_a.y - point_b.y;
+    pub fn reflect_x(&self, x: i64) -> Self {
+        let dx = self.x - x;
+        Self::new(x - dx, self.y)
+    }
+
+    pub fn reflect_y(&self, y: i64) -> Self {
+        let dy = self.y - y;
+        Self::new(self.x, y - dy)
+    }
+
+    pub fn manhattan_distance(a: Self, b: Self) -> i64 {
+        let dx = a.x - b.x;
+        let dy = a.y - b.y;
         dx.abs() + dy.abs()
+    }
+
+    pub fn ccw(a: &Point, b: &Point, c: &Point) -> bool {
+        // are the 3 points listed in counter-clockwise order?
+        // if the slope of the line AB is less than the slope of the line AC
+        (c.y - a.y) * (b.x - a.x) > (b.y - a.y) * (c.x - a.x)
     }
 }
 
-impl Add for Point {
+impl std::ops::Add for Point {
     type Output = Self;
 
     fn add(self, rhs: Self) -> Self::Output {
@@ -112,7 +128,7 @@ impl Add for Point {
     }
 }
 
-impl Sub for Point {
+impl std::ops::Sub for Point {
     type Output = Self;
 
     fn sub(self, rhs: Self) -> Self::Output {
@@ -120,7 +136,7 @@ impl Sub for Point {
     }
 }
 
-impl Display for Point {
+impl std::fmt::Display for Point {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         write!(f, "({},{})", self.x, self.y)
     }
@@ -137,6 +153,123 @@ impl TryFrom<&str> for Point {
         } else {
             Result::Err(Error::msg("missing comma"))
         }
+    }
+}
+
+#[derive(Clone, PartialEq)]
+pub struct Line {
+    pub p0: Point,
+    pub p1: Point,
+    pub slope: Option<i64>,
+    pub y_intercept: Option<i64>,
+}
+
+impl Line {
+    pub fn new(p0: Point, p1: Point) -> Self {
+        let slope = if p0.x == p1.x {
+            None
+        } else {
+            let lp = cmp::min_by_key(p0, p1, |p| p.x);
+            let rp = if lp == p0 { p1 } else { p0 };
+            Some((rp.y - lp.y) / (rp.x - lp.x))
+        };
+        let y_intercept = if p0.x == p1.x {
+            None
+        } else {
+            Some(p0.y - (p0.x * slope.unwrap()))
+        };
+        Self {
+            p0,
+            p1,
+            slope,
+            y_intercept,
+        }
+    }
+
+    pub fn is_horizontal(&self) -> bool {
+        self.p0.y == self.p1.y
+    }
+
+    pub fn is_vertical(&self) -> bool {
+        self.p0.x == self.p1.x
+    }
+
+    pub fn x_min(&self) -> i64 {
+        cmp::min(self.p0.x, self.p1.x)
+    }
+
+    pub fn x_max(&self) -> i64 {
+        cmp::max(self.p0.x, self.p1.x)
+    }
+
+    pub fn y_min(&self) -> i64 {
+        cmp::min(self.p0.y, self.p1.y)
+    }
+
+    pub fn y_max(&self) -> i64 {
+        cmp::max(self.p0.y, self.p1.y)
+    }
+
+    pub fn contains_point(&self, p: &Point) -> bool {
+        if self.is_vertical() {
+            p.x == self.p0.x && (self.y_min()..=self.y_max()).contains(&p.y)
+        } else {
+            p.y == (self.slope.unwrap() * p.x) + self.y_intercept.unwrap()
+                && (self.x_min()..=self.x_max()).contains(&p.x)
+                && (self.y_min()..=self.y_max()).contains(&p.y)
+        }
+    }
+
+    fn has_intersection(a: &Self, b: &Self) -> bool {
+        // note: the below does not cover scenarios when an endpoint is the intersection
+        a.contains_point(&b.p0) || a.contains_point(&b.p1)
+            || b.contains_point(&a.p0) || b.contains_point(&a.p1)
+        // see https://bryceboe.com/2006/10/23/line-segment-intersection-algorithm/
+        // lines A and B intersect if and only if points A0 and A1 are separated by segment B0-B1
+        // and points B0 and B1 are separated by segment A0-A1 then: if A0 and A1 are separated by
+        // segment B0-B1 then A0-B0-B1 and A1-B0-B1 should have opposite orientation; i.e. either
+        // A0-B0-B1 or A1-B0-B1 is counter-clockwise but NOT both
+            || Point::ccw(&a.p0, &b.p0, &b.p1)
+            != Point::ccw(&a.p1, &b.p0, &b.p1)
+            && Point::ccw(&a.p0, &a.p1, &b.p0)
+                != Point::ccw(&a.p0, &a.p1, &b.p1)
+    }
+
+    pub fn intersection(a: &Self, b: &Self) -> Option<Point> {
+        if Self::has_intersection(a, b) {
+            // solve the system of equations
+            let ma = a.slope? as f64;
+            let mb = b.slope? as f64;
+            let mat = Matrix2::new(-ma, 1.0, -mb, 1.0);
+            let vec = Vector2::new(a.y_intercept? as f64, b.y_intercept? as f64);
+            let sol = mat.try_inverse()? * vec;
+            let x = sol[0];
+            let y = sol[1];
+            if x.fract() == 0.0 && y.fract() == 0.0 {
+                return Some(Point::new(x.round() as i64, y.round() as i64));
+            }
+        }
+        None
+    }
+}
+
+impl TryFrom<&str> for Line {
+    type Error = Error;
+
+    fn try_from(value: &str) -> Result<Self, Error> {
+        if let Some((p0_str, p1_str)) = utils::split(value, " -> ") {
+            let p0 = Point::try_from(p0_str)?;
+            let p1 = Point::try_from(p1_str)?;
+            Result::Ok(Self::new(p0, p1))
+        } else {
+            Result::Err(Error::msg("missing separator"))
+        }
+    }
+}
+
+impl std::fmt::Display for Line {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.write_fmt(format_args!("{}->{}", self.p0, self.p1))
     }
 }
 
@@ -233,6 +366,12 @@ impl<T> Grid<T> {
             .collect::<Vec<_>>()
     }
 
+    pub fn neighbors_with_diagonal(&self, i: usize, j: usize) -> Vec<(usize, usize)> {
+        Direction::all_cases()
+            .filter_map(|direction| self.neighbor(i, j, direction))
+            .collect::<Vec<_>>()
+    }
+
     pub fn iter_row(&self, i: usize) -> impl Iterator<Item = &T> {
         self.inner[i].iter()
     }
@@ -248,12 +387,31 @@ impl<T> Grid<T> {
             .flat_map(|(i, row)| row.iter().enumerate().map(move |(j, item)| (i, j, item)))
     }
 
+    pub fn iter_grid_mut(&mut self) -> impl Iterator<Item = (usize, usize, &mut T)> {
+        self.inner
+            .iter_mut()
+            .enumerate()
+            .flat_map(|(i, row)| row.iter_mut().enumerate().map(move |(j, item)| (i, j, item)))
+    }
+
     pub fn find(&self, element: &T) -> Option<(usize, usize)>
     where
         T: PartialEq,
     {
         for (i, j, x) in self.iter_grid() {
             if x == element {
+                return Some((i, j));
+            }
+        }
+        None
+    }
+
+    pub fn find_with<P>(&self, predicate: P) -> Option<(usize, usize)>
+    where
+        P: Fn(&T) -> bool,
+    {
+        for (i, j, x) in self.iter_grid() {
+            if predicate(x) {
                 return Some((i, j));
             }
         }
@@ -300,17 +458,36 @@ where
     }
 }
 
+impl<I, T> FromIterator<I> for Grid<T>
+where
+    I: Iterator<Item = T>,
+    T: Clone,
+{
+    fn from_iter<J>(iter: J) -> Self
+    where
+        J: IntoIterator<Item = I>,
+    {
+        let inner = iter
+            .into_iter()
+            .map(|inner| inner.collect::<Vec<_>>())
+            .collect::<Vec<_>>();
+        let height = inner.len();
+        let width = inner[0].len();
+        Self {
+            width,
+            height,
+            inner,
+        }
+    }
+}
+
 impl<T> From<Vec<Vec<T>>> for Grid<T>
 where
-    T: Clone + Default,
+    T: Clone,
 {
-    fn from(mut value: Vec<Vec<T>>) -> Self {
+    fn from(value: Vec<Vec<T>>) -> Self {
         let height = value.len();
-        // assert uniform width
-        let width = value.iter().map(|row| row.len()).max().unwrap_or(0);
-        for row in value.iter_mut().filter(|row| row.len() < width) {
-            row.extend_from_slice(vec![T::default(); width - row.len()].as_slice());
-        }
+        let width = value[0].len();
         Self {
             width,
             height,
@@ -321,15 +498,11 @@ where
 
 impl From<String> for Grid<char> {
     fn from(value: String) -> Self {
-        let array = value
-            .split('\n')
-            .map(|line| line.chars().collect::<Vec<_>>())
-            .collect::<Vec<_>>();
-        Self::from(array)
+        value.split('\n').map(|line| line.chars()).collect()
     }
 }
 
-impl Display for Grid<char> {
+impl std::fmt::Display for Grid<char> {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         for (i, j, c) in self.iter_grid() {
             if j == 0 && i > 0 {
@@ -345,7 +518,12 @@ pub type Maze = Grid<char>;
 
 impl Maze {
     pub fn create(width: usize, height: usize) -> Self {
-        Self::from(vec![vec!['.'; width]; height])
+        let inner = vec![vec!['.'; width]; height];
+        Self {
+            width,
+            height,
+            inner,
+        }
     }
 
     pub fn is_wall(&self, i: usize, j: usize) -> bool {
@@ -465,7 +643,12 @@ where
         paired_list.into_iter().rev()
     }
 
-    pub fn top(&self) -> usize {
+    pub fn min(&self) -> usize {
+        let sorted = self.sorted().collect::<Vec<_>>();
+        sorted.last().map_or(0, |&(_, count)| count)
+    }
+
+    pub fn max(&self) -> usize {
         let sorted = self.sorted().collect::<Vec<_>>();
         sorted.first().map_or(0, |&(_, count)| count)
     }

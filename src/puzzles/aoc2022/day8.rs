@@ -116,15 +116,10 @@ fn scenic_score(heights: &Grid<u32>, i: usize, j: usize) -> u64 {
 
 pub fn solve(input: String) -> Solution {
     let mut solution = Solution::new();
-    let grid = input
+    let tree_heights = input
         .split('\n')
-        .map(|line| {
-            line.chars()
-                .map(|c| c.to_digit(10).unwrap())
-                .collect::<Vec<_>>()
-        })
-        .collect::<Vec<_>>();
-    let tree_heights = Grid::from(grid);
+        .map(|line| line.chars().map(|c| c.to_digit(10).unwrap()))
+        .collect::<Grid<_>>();
 
     // Part A: Consider your map; how many trees are visible from outside the grid?
     let visible = tree_heights

@@ -108,11 +108,10 @@ fn next_node(
 
 pub fn solve(input: String) -> Solution {
     let mut solution = Solution::new();
-    let grid = input
+    let heightmap = input
         .split('\n')
-        .map(|line| line.chars().map(elevation).collect::<Vec<_>>())
-        .collect::<Vec<_>>();
-    let heightmap = Grid::from(grid);
+        .map(|line| line.chars().map(elevation))
+        .collect::<Grid<_>>();
     // calculate the distances to the top
     let distances = dijkstra(&heightmap);
 

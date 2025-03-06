@@ -8,7 +8,6 @@ use crate::utils;
 use log::debug;
 
 use std::collections::{HashMap, HashSet};
-use std::fmt;
 
 #[derive(Clone, Eq, Hash, PartialEq)]
 struct Connection<'a> {
@@ -53,7 +52,7 @@ impl<'a> From<&'a str> for Connection<'a> {
     }
 }
 
-impl<'a> fmt::Debug for Connection<'a> {
+impl<'a> std::fmt::Debug for Connection<'a> {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         let op = match self.operation {
             "AND" => "&",

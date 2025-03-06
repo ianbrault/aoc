@@ -9,7 +9,6 @@ use log::debug;
 
 use std::cmp;
 use std::collections::{HashMap, HashSet};
-use std::fmt;
 
 const CHAR_BASE: u16 = 'A' as u16;
 // there are 26 letters, this requires 5 bits per letter
@@ -35,8 +34,8 @@ impl From<&str> for Valve {
     }
 }
 
-impl fmt::Display for Valve {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+impl std::fmt::Display for Valve {
+    fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
         let a = ((self.0 >> 5) & 0x1F) + CHAR_BASE;
         let b = (self.0 & 0x1F) + CHAR_BASE;
         let ca = char::from_u32(a as u32).unwrap();

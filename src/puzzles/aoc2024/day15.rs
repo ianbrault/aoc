@@ -9,7 +9,6 @@ use crate::utils;
 use log::debug;
 
 use std::collections::HashSet;
-use std::fmt::Display;
 
 #[derive(Clone)]
 struct Map {
@@ -168,7 +167,7 @@ impl Map {
     }
 }
 
-impl Display for Map {
+impl std::fmt::Display for Map {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         for (i, j, c) in self.grid.iter_grid() {
             if j == 0 {
