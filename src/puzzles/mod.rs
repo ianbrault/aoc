@@ -3,6 +3,7 @@
 */
 
 crate::puzzle_modules!(
+    2020 => aoc2020,
     2021 => aoc2021,
     2022 => aoc2022,
     2023 => aoc2023,
@@ -110,6 +111,12 @@ impl From<u32> for Answer {
 impl From<u64> for Answer {
     fn from(n: u64) -> Self {
         Self::UInt(n)
+    }
+}
+
+impl From<&u64> for Answer {
+    fn from(n: &u64) -> Self {
+        Self::UInt(*n)
     }
 }
 

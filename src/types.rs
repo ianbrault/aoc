@@ -388,10 +388,11 @@ impl<T> Grid<T> {
     }
 
     pub fn iter_grid_mut(&mut self) -> impl Iterator<Item = (usize, usize, &mut T)> {
-        self.inner
-            .iter_mut()
-            .enumerate()
-            .flat_map(|(i, row)| row.iter_mut().enumerate().map(move |(j, item)| (i, j, item)))
+        self.inner.iter_mut().enumerate().flat_map(|(i, row)| {
+            row.iter_mut()
+                .enumerate()
+                .map(move |(j, item)| (i, j, item))
+        })
     }
 
     pub fn find(&self, element: &T) -> Option<(usize, usize)>
@@ -631,6 +632,15 @@ where
     pub fn add_many(&mut self, element: T, count: usize) {
         let entry = self.counts.entry(element).or_insert(0);
         *entry += count;
+    }
+
+    pub fn extend<I>(&mut self, iter: I)
+    where
+        I: Iterator<Item = T>,
+    {
+        for item in iter {
+            self.add(item);
+        }
     }
 
     pub fn remove(&mut self, element: T) -> Option<usize> {
