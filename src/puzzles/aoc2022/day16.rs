@@ -280,7 +280,7 @@ fn find_max_pressure_release_rec(
     // flow rate with the distance to reach them
     let mut candidates = open_valves
         .iter()
-        .filter(|(_, &is_open)| !is_open)
+        .filter(|&(_, &is_open)| !is_open)
         .map(|(&vid, _)| vid)
         .collect::<Vec<_>>();
     candidates.sort_by(|&a, &b| {
@@ -326,7 +326,7 @@ fn find_max_pressure_release(info: &VolcanoInfo) -> u64 {
         .0
         .iter()
         .enumerate()
-        .filter(|(_, &flow)| flow != 0 && flow != u64::MAX)
+        .filter(|&(_, &flow)| flow != 0 && flow != u64::MAX)
         .map(|(vid, _)| (vid as u16, false))
         .collect::<HashMap<_, _>>();
     open_valves.insert(0, true);
@@ -341,7 +341,7 @@ fn generate_valve_partitions(info: &VolcanoInfo) -> Vec<(HashSet<u16>, HashSet<u
         .0
         .iter()
         .enumerate()
-        .filter(|(_, &flow)| flow != 0 && flow != u64::MAX)
+        .filter(|&(_, &flow)| flow != 0 && flow != u64::MAX)
         .map(|(vid, _)| vid as u16)
         .collect::<Vec<_>>();
     valves.sort();
@@ -377,7 +377,7 @@ fn count_valves(info: &VolcanoInfo) -> usize {
         .0
         .iter()
         .enumerate()
-        .filter(|(_, &flow)| flow != 0 && flow != u64::MAX)
+        .filter(|&(_, &flow)| flow != 0 && flow != u64::MAX)
         .count()
 }
 

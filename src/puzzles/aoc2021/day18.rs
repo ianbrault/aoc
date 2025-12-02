@@ -58,7 +58,7 @@ impl<T> TreeNode<T> {
         self.children
             .iter()
             .enumerate()
-            .find(|(_, &child_id)| child_id == node_id)
+            .find(|&(_, &child_id)| child_id == node_id)
             .map(|(i, _)| i)
     }
 }

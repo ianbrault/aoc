@@ -43,7 +43,7 @@ fn find_earliest_timestamp(buses: &[i64]) -> i64 {
     let (a, ids): (Vec<_>, Vec<_>) = buses
         .iter()
         .enumerate()
-        .filter(|(_, &b)| b > 0)
+        .filter(|&(_, &b)| b > 0)
         .map(|(offset, &id)| (id - offset as i64, id))
         .unzip();
 

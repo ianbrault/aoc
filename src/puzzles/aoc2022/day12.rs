@@ -125,7 +125,7 @@ pub fn solve(input: String) -> Solution {
     // to the location that should get the best signal?
     let best_path_from_bottom = heightmap
         .iter_grid()
-        .filter(|(_, _, &h)| h == 0)
+        .filter(|&(_, _, &h)| h == 0)
         .map(|(i, j, _)| distances.get(i, j))
         .min()
         .unwrap();

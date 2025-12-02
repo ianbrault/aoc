@@ -195,7 +195,7 @@ pub fn solve(input: String) -> Solution {
     let max_size = 100000;
     let dir_size_sum = dir_sizes
         .iter()
-        .filter(|(_, &size)| size <= max_size)
+        .filter(|&(_, &size)| size <= max_size)
         .map(|(_, &size)| size)
         .sum::<u64>();
     solution.set_part_a(dir_size_sum);

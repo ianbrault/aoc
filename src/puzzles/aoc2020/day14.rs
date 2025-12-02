@@ -94,7 +94,7 @@ impl Mask {
         n & BITMASK
     }
 
-    fn apply_to_with_floating(&self, mut n: u64) -> impl Iterator<Item = u64> {
+    fn apply_to_with_floating(&self, mut n: u64) -> impl Iterator<Item = u64> + use<> {
         // set all One bits to 1, and mark the floating bits
         let mut floating_bits = vec![];
         for (i, bit) in self.bits.iter().enumerate() {

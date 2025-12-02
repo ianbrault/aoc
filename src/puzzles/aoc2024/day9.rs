@@ -43,10 +43,10 @@ fn compact_hard_drive(disk_map: &[DiskItem]) -> Vec<Block> {
                 blocks.extend(iter::repeat(Block(*id)).take(*file_size));
                 state = queue.pop_front();
             }
-            DiskItem::FreeSpace(ref mut size) => {
+            DiskItem::FreeSpace(size) => {
                 if let Some(tail_item) = &mut tail {
                     match tail_item {
-                        DiskItem::File(id, ref mut file_size) => {
+                        DiskItem::File(id, file_size) => {
                             if *file_size == 0 {
                                 tail = queue.pop_back();
                             } else if file_size >= size {
