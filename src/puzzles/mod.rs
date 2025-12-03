@@ -10,7 +10,7 @@ crate::puzzle_modules!(
     2024 => aoc2024
 );
 
-#[derive(Clone, Copy)]
+#[derive(Clone, Copy, Eq, Hash, PartialEq)]
 pub struct Puzzle {
     pub year: usize,
     pub day: usize,
@@ -49,6 +49,10 @@ impl PuzzleIterator {
             day: day.map(|d| d - 1),
             current_day: 0,
         }
+    }
+
+    pub fn all() -> Self {
+        Self::new(None, None)
     }
 }
 

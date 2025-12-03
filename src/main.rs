@@ -21,16 +21,19 @@ struct Args {
     /// Use sample puzzle input
     #[arg(short, long)]
     sample: bool,
+    /// Benchmark puzzle solutions and produce a report
+    #[arg(short, long)]
+    benchmark: bool,
+    /// Number of iterations to use when benchmarking
+    #[arg(long, id = "N", default_value_t = 10)]
+    benchmark_iterations: usize,
     /// Enable debug output
     #[arg(short, long)]
     debug: bool,
 }
 
-fn main() {
-    // parse command-line args
-    let args = Args::parse();
-    // initialize terminal logger
-    let log_level = if args.debug {
+fn initialize_logger(debug: bool) {
+    let log_level = if debug {
         LevelFilter::Debug
     } else {
         LevelFilter::Info
@@ -42,7 +45,17 @@ fn main() {
         simplelog::ColorChoice::Auto,
     )
     .unwrap();
+}
 
-    // run one or more puzzles, as specified
-    driver::run_puzzles(args.year, args.day, args.sample);
+fn main() {
+    let args = Args::parse();
+    initialize_logger(args.debug);
+
+    if args.benchmark {
+        // Run benchmarks and produce a report
+        driver::run_benchmark(args.benchmark_iterations);
+    } else {
+        // Run one or more puzzles, as specified
+        driver::run_puzzles(args.year, args.day, args.sample);
+    }
 }

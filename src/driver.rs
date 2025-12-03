@@ -2,11 +2,13 @@
 ** src/driver.rs
 */
 
+use crate::itertools::*;
 use crate::puzzles::{Answer, Puzzle, PuzzleIterator, PuzzleModules};
 use crate::utils;
 
 use log::{debug, info};
 
+use std::collections::HashMap;
 use std::env;
 use std::path::Path;
 use std::time::Instant;
@@ -45,11 +47,49 @@ pub fn run_puzzles(year: Option<usize>, day: Option<usize>, sample: bool) {
         let input = load_input(puzzle, sample);
         let solver = PuzzleModules::dispatch(puzzle.year, puzzle.day);
 
-        // solver the puzzle and benchmark
+        // Solve the puzzle and benchmark
         let t = Instant::now();
         let solution = (solver)(input);
         print_benchmark(t);
         info!("Part A solution: {}", answer_to_string(solution.part_a));
         info!("Part B solution: {}", answer_to_string(solution.part_b));
+    }
+}
+
+pub fn run_benchmark(iterations: usize) {
+    // Run puzzle benchmarks
+    let mut benchmark = HashMap::new();
+    for _ in 0..iterations {
+        for puzzle in PuzzleIterator::all() {
+            let input = load_input(puzzle, false);
+            let solver = PuzzleModules::dispatch(puzzle.year, puzzle.day);
+
+            let t = Instant::now();
+            (solver)(input);
+            let elapsed = t.elapsed().as_secs_f64() * 1000.0;
+
+            let entry = benchmark.entry(puzzle).or_insert(Vec::new());
+            entry.push(elapsed);
+        }
+    }
+
+    // Print benchmark results
+    println!("## Results\n");
+    println!(
+        "Results are benchmarked with {} executions through each solution.\n",
+        iterations
+    );
+    for year in PuzzleIterator::all().map(|puzzle| puzzle.year).dedup() {
+        println!("### {}\n", year);
+        println!("| Puzzle | Time (ms) |");
+        println!("|:---|---:|");
+        for puzzle in PuzzleIterator::all() {
+            if puzzle.year != year {
+                continue;
+            }
+            let t = benchmark[&puzzle].iter().sum::<f64>() / benchmark[&puzzle].len() as f64;
+            println!("| {} | {:.3} |", puzzle.day + 1, t);
+        }
+        println!();
     }
 }

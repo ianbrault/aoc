@@ -75,6 +75,45 @@ pub trait Triples<T>: Iterator<Item = T> + Sized {
 
 impl<T, I: Iterator<Item = T>> Triples<T> for I {}
 
+pub struct DedupIterator<I, T> {
+    iter: I,
+    previous: Option<T>,
+}
+
+impl<I, T> DedupIterator<I, T> {
+    pub fn new(iter: I) -> Self {
+        Self {
+            iter,
+            previous: None,
+        }
+    }
+}
+
+impl<I, T> Iterator for DedupIterator<I, T>
+where
+    T: Clone + PartialEq,
+    I: Iterator<Item = T>,
+{
+    type Item = T;
+
+    fn next(&mut self) -> Option<Self::Item> {
+        let mut item = self.iter.next();
+        while item == self.previous {
+            item = self.iter.next();
+        }
+        self.previous = item.clone();
+        item
+    }
+}
+
+pub trait Dedup<T>: Iterator<Item = T> + Sized {
+    fn dedup(self) -> DedupIterator<Self, T> {
+        DedupIterator::new(self)
+    }
+}
+
+impl<T, I: Iterator<Item = T>> Dedup<T> for I {}
+
 pub struct CombinationIterator<T>
 where
     T: Clone,
