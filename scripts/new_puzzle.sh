@@ -2,6 +2,10 @@
 
 YEAR=$1
 DAY=$2
+
+mkdir -p "input/$YEAR/full"
+mkdir -p "input/$YEAR/sample"
+mkdir -p "src/puzzles/aoc$YEAR"
 touch "input/$YEAR/full/$DAY.txt"
 touch "input/$YEAR/sample/$DAY.txt"
 touch "src/puzzles/aoc$YEAR/day$DAY.rs"
