@@ -7,7 +7,8 @@ crate::puzzle_modules!(
     2021 => aoc2021,
     2022 => aoc2022,
     2023 => aoc2023,
-    2024 => aoc2024
+    2024 => aoc2024,
+    2025 => aoc2025
 );
 
 #[derive(Clone, Copy, Eq, Hash, PartialEq)]
