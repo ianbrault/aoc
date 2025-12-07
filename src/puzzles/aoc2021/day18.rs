@@ -401,7 +401,7 @@ impl SnailfishNumber {
 
         node.data = NumberType::Nested;
         self.tree.insert((n / 2).into(), Some(node_id));
-        self.tree.insert(((n + 1) / 2).into(), Some(node_id));
+        self.tree.insert(n.div_ceil(2).into(), Some(node_id));
 
         self
     }

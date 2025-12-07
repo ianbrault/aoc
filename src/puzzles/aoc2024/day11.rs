@@ -16,7 +16,7 @@ fn blink(stones: &[u64], count: usize) -> usize {
                 new_counts.add_many(1, stone_count);
             } else {
                 let n_digits = utils::num_digits(stone);
-                if n_digits % 2 == 0 {
+                if n_digits.is_multiple_of(2) {
                     let power = 10u64.pow(n_digits / 2);
                     new_counts.add_many(stone / power, stone_count);
                     new_counts.add_many(stone % power, stone_count);

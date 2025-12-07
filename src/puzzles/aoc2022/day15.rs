@@ -99,7 +99,7 @@ impl Range {
             }
         }
         // check if the input length was odd, the last range will be hanging
-        if n_ranges % 2 != 0 {
+        if !n_ranges.is_multiple_of(2) {
             output.push(input[n_ranges - 1].clone());
         }
         output

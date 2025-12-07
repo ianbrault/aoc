@@ -25,7 +25,7 @@ impl Fold {
 
 impl From<&str> for Fold {
     fn from(value: &str) -> Self {
-        let line = value.split(' ').last().unwrap();
+        let line = value.split(' ').next_back().unwrap();
         let (axis, point) = utils::split(line, "=").unwrap();
         match axis {
             "x" => Fold::X(point.parse().unwrap()),

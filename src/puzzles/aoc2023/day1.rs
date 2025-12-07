@@ -11,7 +11,7 @@ const DIGIT_STRINGS: [&str; 9] = [
 ];
 
 fn first_digit(string: &str, matching_digit_strings: bool) -> Option<u32> {
-    for (i, c) in string.chars().enumerate() {
+    for (i, c) in string.char_indices() {
         if c.is_numeric() {
             return Some(c.to_digit(10).unwrap());
         } else if matching_digit_strings {

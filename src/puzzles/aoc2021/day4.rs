@@ -26,7 +26,7 @@ impl BingoBoard {
     }
 
     fn contains_row(&self, pos: usize) -> bool {
-        pos % 5 == 0
+        pos.is_multiple_of(5)
             && self.marked.contains(&(pos + 1))
             && self.marked.contains(&(pos + 2))
             && self.marked.contains(&(pos + 3))

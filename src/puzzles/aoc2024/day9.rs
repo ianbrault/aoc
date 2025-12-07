@@ -40,7 +40,7 @@ fn compact_hard_drive(disk_map: &[DiskItem]) -> Vec<Block> {
     while let Some(item) = &mut state {
         match item {
             DiskItem::File(id, file_size) => {
-                blocks.extend(iter::repeat(Block(*id)).take(*file_size));
+                blocks.extend(iter::repeat_n(Block(*id), *file_size));
                 state = queue.pop_front();
             }
             DiskItem::FreeSpace(size) => {
@@ -50,11 +50,11 @@ fn compact_hard_drive(disk_map: &[DiskItem]) -> Vec<Block> {
                             if *file_size == 0 {
                                 tail = queue.pop_back();
                             } else if file_size >= size {
-                                blocks.extend(iter::repeat(Block(*id)).take(*size));
+                                blocks.extend(iter::repeat_n(Block(*id), *size));
                                 *file_size -= *size;
                                 state = queue.pop_front();
                             } else {
-                                blocks.extend(iter::repeat(Block(*id)).take(*file_size));
+                                blocks.extend(iter::repeat_n(Block(*id), *file_size));
                                 *size -= *file_size;
                                 tail = queue.pop_back();
                             }
@@ -71,7 +71,7 @@ fn compact_hard_drive(disk_map: &[DiskItem]) -> Vec<Block> {
     }
     // check for leftover blocks on the tail
     if let Some(DiskItem::File(id, file_size)) = tail {
-        blocks.extend(iter::repeat(Block(id)).take(file_size));
+        blocks.extend(iter::repeat_n(Block(id), file_size));
     }
 
     blocks
@@ -118,13 +118,13 @@ fn compact_hard_drive_no_fragmentation(disk_map: &[DiskItem]) -> Vec<Block> {
             &DiskItem::File(_, size) => size,
             _ => unreachable!(),
         };
-        if let Some((free_index, free_size)) = find_space_for_file(&items, file_size, file_index) {
-            if free_index < file_index {
-                items[free_index] = DiskItem::File(file_id, file_size);
-                items[file_index] = DiskItem::FreeSpace(file_size);
-                if free_size > file_size {
-                    items.insert(free_index + 1, DiskItem::FreeSpace(free_size - file_size));
-                }
+        if let Some((free_index, free_size)) = find_space_for_file(&items, file_size, file_index)
+            && free_index < file_index
+        {
+            items[free_index] = DiskItem::File(file_id, file_size);
+            items[file_index] = DiskItem::FreeSpace(file_size);
+            if free_size > file_size {
+                items.insert(free_index + 1, DiskItem::FreeSpace(free_size - file_size));
             }
         }
     }

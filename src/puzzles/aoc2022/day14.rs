@@ -155,11 +155,11 @@ impl CaveState {
                 self.sand_state = SandState::AtRest;
             }
             // check if the sand has fallen into the void
-            if let Some(point) = self.sand {
-                if point.y > self.lowest_rock {
-                    debug!("sand has fallen into the void at {}", point);
-                    self.sand_state = SandState::InTheVoid;
-                }
+            if let Some(point) = self.sand
+                && point.y > self.lowest_rock
+            {
+                debug!("sand has fallen into the void at {}", point);
+                self.sand_state = SandState::InTheVoid;
             }
         } else {
             unreachable!()
@@ -225,10 +225,7 @@ impl From<Vec<RockPath>> for CaveState {
 
 pub fn solve(input: String) -> Solution {
     let mut solution = Solution::new();
-    let rock_paths = input
-        .split('\n')
-        .map(RockPath::from)
-        .collect::<Vec<_>>();
+    let rock_paths = input.split('\n').map(RockPath::from).collect::<Vec<_>>();
     let mut cave_state = CaveState::from(rock_paths);
 
     // Part A: Using your scan, simulate the falling sand. How many units of sand come to rest

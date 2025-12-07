@@ -24,9 +24,11 @@ impl Keypad {
     }
 
     fn repeat_sequence(dx: i64, dy: i64) -> Vec<char> {
-        iter::repeat(Self::direction(dx, dy))
-            .take(cmp::max(dx.unsigned_abs(), dy.unsigned_abs()) as usize)
-            .collect()
+        iter::repeat_n(
+            Self::direction(dx, dy),
+            cmp::max(dx.unsigned_abs(), dy.unsigned_abs()) as usize,
+        )
+        .collect()
     }
 
     fn get(&self, v: char) -> Point {

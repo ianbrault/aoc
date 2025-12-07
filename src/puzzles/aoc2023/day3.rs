@@ -65,11 +65,7 @@ impl Engine {
                 n_adjacent += 1;
             }
         }
-        if n_adjacent == 2 {
-            ratio
-        } else {
-            0
-        }
+        if n_adjacent == 2 { ratio } else { 0 }
     }
 }
 
@@ -79,7 +75,7 @@ impl From<String> for Engine {
         let mut symbols = Vec::new();
         for (y, line) in value.split("\n").enumerate() {
             let mut number_start = None;
-            for (x, c) in line.chars().enumerate() {
+            for (x, c) in line.char_indices() {
                 if c == '.' {
                     // terminating a number
                     if let Some(x0) = number_start {

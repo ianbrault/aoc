@@ -57,7 +57,7 @@ fn pair_counter_to_char_counter(pair_counts: PairCounter) -> Counter<char> {
 
     let mut output = Counter::new();
     for (&c, &count) in char_counts.iter() {
-        output.add_many(c, (count + 1) / 2);
+        output.add_many(c, count.div_ceil(2));
     }
     output
 }

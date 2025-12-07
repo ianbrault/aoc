@@ -49,7 +49,7 @@ impl CPU {
 
     fn draw_pixel(&mut self) {
         // move to the next line of the image on each 40th cycle
-        if self.cycle % 40 == 0 {
+        if self.cycle.is_multiple_of(40) {
             self.image.push('\n');
         }
         let pixel_pos = self.cycle as i64 % 40;

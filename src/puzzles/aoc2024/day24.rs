@@ -91,10 +91,9 @@ impl<'a> Device<'a> {
             .iter()
             .filter(|c| c.output.starts_with('z'))
             .max_by_key(|c| &c.output)
+            && let Ok(n) = connection.output[1..].parse::<usize>()
         {
-            if let Ok(n) = connection.output[1..].parse::<usize>() {
-                bits = n + 1;
-            }
+            bits = n + 1;
         }
 
         Self {

@@ -58,7 +58,7 @@ fn solution_count(time_limit: u64, distance_record: u64) -> u64 {
     // which can be expressed as a quadratic with a variable time pressed
     // -t^2 + tL*t -dR > 0
     // which is an upside-down parabola, so find the solutions and grab all integers between there
-    let (mut x, mut y) = quadratic(-1.0, time_limit as f64, -1.0 * distance_record as f64);
+    let (mut x, mut y) = quadratic(-1.0, time_limit as f64, -(distance_record as f64));
     if x.fract() != 0.0 {
         x = x.ceil()
     }
