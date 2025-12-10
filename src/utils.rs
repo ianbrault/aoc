@@ -9,7 +9,7 @@ use std::io::{self, BufReader};
 use std::path::Path;
 use std::str::FromStr;
 
-/// reads the contents of a file into a string
+/// Reads the contents of a file into a string
 pub fn read_file(path: &Path) -> io::Result<String> {
     let file = File::open(path)?;
     let mut buf_reader = BufReader::new(file);
@@ -18,7 +18,7 @@ pub fn read_file(path: &Path) -> io::Result<String> {
     Ok(contents)
 }
 
-/// splits a string by whitespace and parses the component parts into the given type
+/// Splits a string by whitespace and parses the component parts into the given type
 pub fn split_and_parse<T>(string: &str) -> impl Iterator<Item = T> + '_
 where
     T: FromStr,
@@ -28,7 +28,7 @@ where
         .filter_map(|x| x.parse::<T>().ok())
 }
 
-/// returns the head and tail of the string split at the first instance of the given pattern
+/// Returns the head and tail of the string split at the first instance of the given pattern
 pub fn split<'a>(string: &'a str, after: &str) -> Option<(&'a str, &'a str)> {
     if let Some(sep) = string.find(after) {
         let a = &string[..sep];
@@ -39,7 +39,7 @@ pub fn split<'a>(string: &'a str, after: &str) -> Option<(&'a str, &'a str)> {
     }
 }
 
-/// returns the tail of the string split at the first instance of the given pattern
+/// Returns the tail of the string split at the first instance of the given pattern
 pub fn split_tail<'a>(string: &'a str, after: &str) -> Option<&'a str> {
     if let Some(sep) = string.find(after) {
         Some(&string[(sep + after.len())..])
@@ -48,7 +48,7 @@ pub fn split_tail<'a>(string: &'a str, after: &str) -> Option<&'a str> {
     }
 }
 
-/// greatest-common-divisor of 2 numbers
+/// Greatest-common-divisor of 2 numbers
 pub fn gcd(x: u64, y: u64) -> u64 {
     if x == y {
         return x;
@@ -64,7 +64,7 @@ pub fn gcd(x: u64, y: u64) -> u64 {
     a
 }
 
-/// least-common-multiple of 2 numbers
+/// Least-common-multiple of 2 numbers
 pub fn lcm(x: u64, y: u64) -> u64 {
     x * (y / gcd(x, y))
 }
@@ -80,7 +80,7 @@ where
     )
 }
 
-/// sort 2 ordered items into a minimum and maximum, using the given key function
+/// Sort 2 ordered items into a minimum and maximum, using the given key function
 pub fn min_max_by_key<T, F, K>(a: T, b: T, f: F) -> (T, T)
 where
     T: Clone,
@@ -93,7 +93,7 @@ where
     )
 }
 
-/// calculates the number of digits in the given integer value
+/// Calculates the number of digits in the given integer value
 pub fn num_digits(n: u64) -> u32 {
     n.checked_ilog10().unwrap_or(0) + 1
 }

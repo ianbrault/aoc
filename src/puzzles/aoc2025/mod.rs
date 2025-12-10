@@ -3,5 +3,5 @@
 */
 
 crate::puzzle_set!(
-    day1
+    day1, day2
 );

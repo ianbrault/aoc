@@ -238,3 +238,15 @@ pub trait Combinations<T: Clone>: Iterator<Item = T> + Sized {
 }
 
 impl<T: Clone, I: Iterator<Item = T>> Combinations<T> for I {}
+
+pub trait AllEqual<T: PartialEq>: Iterator<Item = T> + Sized {
+    fn all_equal(mut self) -> bool {
+        if let Some(first) = self.next() {
+            self.all(|item| item == first)
+        } else {
+            true
+        }
+    }
+}
+
+impl<T: PartialEq, I: Iterator<Item = T>> AllEqual<T> for I {}
