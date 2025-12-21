@@ -157,6 +157,44 @@ impl TryFrom<&str> for Point {
     }
 }
 
+#[derive(Debug)]
+pub struct Point3D {
+    pub x: i64,
+    pub y: i64,
+    pub z: i64,
+}
+
+impl Point3D {
+    pub fn new(x: i64, y: i64, z: i64) -> Self {
+        Self { x, y, z }
+    }
+}
+
+impl std::fmt::Display for Point3D {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "({},{},{})", self.x, self.y, self.z)
+    }
+}
+
+impl TryFrom<&str> for Point3D {
+    type Error = Error;
+
+    fn try_from(value: &str) -> Result<Self, Self::Error> {
+        let parts = value.split(',').collect::<Vec<_>>();
+        match parts.as_slice() {
+            [x_str, y_str, z_str] => {
+                let x = x_str.parse::<i64>()?;
+                let y = y_str.parse::<i64>()?;
+                let z = z_str.parse::<i64>()?;
+                Result::Ok(Self::new(x, y, z))
+            }
+            _ => {
+                Result::Err(Error::msg("invalid format"))
+            }
+        }
+    }
+}
+
 #[derive(Clone, PartialEq)]
 pub struct Line {
     pub p0: Point,
