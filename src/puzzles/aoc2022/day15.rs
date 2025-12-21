@@ -3,8 +3,7 @@
 */
 
 use super::Solution;
-use crate::itertools::*;
-use crate::types::Point;
+use crate::types::{Point, RangeInclusive};
 use crate::utils;
 
 use std::cmp;
@@ -29,7 +28,7 @@ impl Sensor {
         Point::new(x, y)
     }
 
-    fn visible_range_of_row(&self, y: i64) -> Range {
+    fn visible_range_of_row(&self, y: i64) -> RangeInclusive<i64> {
         let max_y = if y < self.pos.y {
             self.pos.y - self.beacon_distance
         } else {
@@ -38,7 +37,7 @@ impl Sensor {
         let y_dist = (max_y - y).abs();
         let x_min = self.pos.x - y_dist;
         let x_max = self.pos.x + y_dist;
-        Range::new(x_min, x_max)
+        RangeInclusive::new(x_min, x_max)
     }
 }
 
@@ -56,91 +55,22 @@ impl From<&str> for Sensor {
     }
 }
 
-#[derive(Clone, Debug, Eq, Hash, PartialEq)]
-struct Range {
-    min: i64,
-    max: i64,
-}
-
-impl Range {
-    fn new(min: i64, max: i64) -> Self {
-        Self { min, max }
-    }
-
-    fn size(&self) -> i64 {
-        self.max - self.min
-    }
-
-    fn overlaps(&self, other: &Self) -> bool {
-        (other.min >= self.min && other.min <= self.max)
-            || (other.max >= self.min && other.max <= self.max)
-    }
-
-    fn try_combine(&self, other: &Self) -> (Self, Option<Self>) {
-        if self.overlaps(other) {
-            let min = cmp::min(self.min, other.min);
-            let max = cmp::max(self.max, other.max);
-            (Self::new(min, max), None)
-        } else {
-            (self.clone(), Some(other.clone()))
-        }
-    }
-
-    fn reduction_pass(input: Vec<Self>) -> Vec<Self> {
-        let n_ranges = input.len();
-        let mut output = Vec::with_capacity(n_ranges);
-        // attempt to reduce pairs of ranges
-        // these will be sorted so they will be candidates for overlaps
-        for (range_a, range_b) in input.iter().paired() {
-            let (range_a, maybe_range_b) = range_a.try_combine(range_b);
-            output.push(range_a);
-            if let Some(range_b) = maybe_range_b {
-                output.push(range_b);
-            }
-        }
-        // check if the input length was odd, the last range will be hanging
-        if !n_ranges.is_multiple_of(2) {
-            output.push(input[n_ranges - 1].clone());
-        }
-        output
-    }
-
-    fn reduce(ranges: Vec<Self>) -> Vec<Self> {
-        let mut output = ranges;
-        // sort the ranges to start
-        output.sort_by(|a, b| a.min.cmp(&b.min));
-
-        let mut prev_len = output.len();
-        // loop until there is a single range remaining or if the pass does not
-        // perform any further reductions
-        loop {
-            output = Self::reduction_pass(output);
-            if output.len() == 1 || output.len() == prev_len {
-                break;
-            }
-            prev_len = output.len();
-        }
-
-        output
-    }
-}
-
 fn filter_sensors_by_y_view(sensors: &[Sensor], y: i64) -> impl Iterator<Item = &Sensor> {
     sensors
         .iter()
         .filter(move |s| y >= s.pos.y - s.beacon_distance && y <= s.pos.y + s.beacon_distance)
 }
 
-fn get_visible_x_range_of_row(sensors: &[Sensor], y: i64) -> Range {
+fn get_visible_x_range_of_row(sensors: &[Sensor], y: i64) -> RangeInclusive<i64> {
     let mut x_min = i64::MAX;
     let mut x_max = i64::MIN;
     // grab all sensors that can view the target row
     for sensor in filter_sensors_by_y_view(sensors, y) {
         let x_range = sensor.visible_range_of_row(y);
-        x_min = cmp::min(x_min, x_range.min);
-        x_max = cmp::max(x_max, x_range.max);
+        x_min = cmp::min(x_min, x_range.start);
+        x_max = cmp::max(x_max, x_range.end);
     }
-    Range::new(x_min, x_max)
+    RangeInclusive::new(x_min, x_max)
 }
 
 fn non_beacon_points_in_row(sensors: &[Sensor], beacons: &HashSet<Point>, y: i64) -> i64 {
@@ -150,7 +80,7 @@ fn non_beacon_points_in_row(sensors: &[Sensor], beacons: &HashSet<Point>, y: i64
     // then remove any beacons from the set
     let beacons_in_row = beacons
         .iter()
-        .filter(|b| b.y == y && b.x >= x_range.min && b.x <= x_range.max)
+        .filter(|b| b.y == y && b.x >= x_range.start && b.x <= x_range.end)
         .count() as i64;
     x_range.size() - beacons_in_row + 1
 }
@@ -171,11 +101,11 @@ fn find_distress_beacon(sensors: &[Sensor]) -> Option<Point> {
             .map(|s| s.visible_range_of_row(y))
             .collect::<Vec<_>>();
         // and reduce the ranges
-        let sensors_x_range = Range::reduce(sensor_x_ranges);
+        let sensors_x_range = RangeInclusive::reduce(sensor_x_ranges);
         // we are looking for a single point of separation between 2 ranges
         // if this is found, this is the distress beacon
-        if sensors_x_range.len() == 2 && sensors_x_range[1].min == sensors_x_range[0].max + 2 {
-            return Some(Point::new(sensors_x_range[0].max + 1, y));
+        if sensors_x_range.len() == 2 && sensors_x_range[1].start == sensors_x_range[0].end + 2 {
+            return Some(Point::new(sensors_x_range[0].end + 1, y));
         }
     }
     // the distress beacon was not found

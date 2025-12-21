@@ -11,6 +11,7 @@ use nalgebra::{Matrix2, Vector2};
 use std::cmp::{self, Ordering};
 use std::collections::{BinaryHeap, HashMap};
 use std::hash::Hash;
+use std::ops::Sub;
 
 #[derive(CaseIterable, Clone, Copy, Debug, Eq, Hash, PartialEq)]
 pub enum Direction {
@@ -114,8 +115,8 @@ impl Point {
     }
 
     pub fn ccw(a: &Point, b: &Point, c: &Point) -> bool {
-        // are the 3 points listed in counter-clockwise order?
-        // if the slope of the line AB is less than the slope of the line AC
+        // Are the 3 points listed in counter-clockwise order?
+        // If the slope of the line AB is less than the slope of the line AC
         (c.y - a.y) * (b.x - a.x) > (b.y - a.y) * (c.x - a.x)
     }
 }
@@ -221,11 +222,11 @@ impl Line {
     }
 
     fn has_intersection(a: &Self, b: &Self) -> bool {
-        // note: the below does not cover scenarios when an endpoint is the intersection
+        // Note: the below does not cover scenarios when an endpoint is the intersection
         a.contains_point(&b.p0) || a.contains_point(&b.p1)
             || b.contains_point(&a.p0) || b.contains_point(&a.p1)
-        // see https://bryceboe.com/2006/10/23/line-segment-intersection-algorithm/
-        // lines A and B intersect if and only if points A0 and A1 are separated by segment B0-B1
+        // See https://bryceboe.com/2006/10/23/line-segment-intersection-algorithm/
+        // Lines A and B intersect if and only if points A0 and A1 are separated by segment B0-B1
         // and points B0 and B1 are separated by segment A0-A1 then: if A0 and A1 are separated by
         // segment B0-B1 then A0-B0-B1 and A1-B0-B1 should have opposite orientation; i.e. either
         // A0-B0-B1 or A1-B0-B1 is counter-clockwise but NOT both
@@ -237,7 +238,7 @@ impl Line {
 
     pub fn intersection(a: &Self, b: &Self) -> Option<Point> {
         if Self::has_intersection(a, b) {
-            // solve the system of equations
+            // Solve the system of equations
             let ma = a.slope? as f64;
             let mb = b.slope? as f64;
             let mat = Matrix2::new(-ma, 1.0, -mb, 1.0);
@@ -512,6 +513,79 @@ impl std::fmt::Display for Grid<char> {
             write!(f, "{}", c)?;
         }
         writeln!(f)
+    }
+}
+
+#[derive(Clone, Debug)]
+pub struct RangeInclusive<T>
+where
+    T: Clone + Copy + Ord + PartialOrd + Sub<Output = T>,
+{
+    pub start: T,
+    pub end: T,
+}
+
+impl<T> RangeInclusive<T>
+where
+    T: Clone + Copy + Ord + PartialOrd + Sub<Output = T>,
+{
+    pub fn new(start: T, end: T) -> Self {
+        Self { start, end }
+    }
+
+    pub fn contains(&self, value: &T) -> bool {
+        value >= &self.start && value <= &self.end
+    }
+
+    pub fn size(&self) -> T {
+        self.end - self.start
+    }
+
+    pub fn overlaps(&self, other: &Self) -> bool {
+        (other.start >= self.start && other.start <= self.end)
+            || (other.end >= self.start && other.end <= self.end)
+    }
+
+    fn try_combine(&self, other: &Self) -> (Self, Option<Self>) {
+        if self.overlaps(other) {
+            let min = cmp::min(self.start, other.start);
+            let max = cmp::max(self.end, other.end);
+            (Self::new(min, max), None)
+        } else {
+            (self.clone(), Some(other.clone()))
+        }
+    }
+
+    fn reduce_recursive(input: Vec<Self>, current: Self, index: usize, output: &mut Vec<Self>) {
+        match &input[index..] {
+            [] => {
+                output.push(current);
+            }
+            [next, ..] => {
+                let combination = current.try_combine(next);
+                if let (range_a, Some(range_b)) = combination {
+                    // Unsuccessful combination
+                    output.push(range_a);
+                    Self::reduce_recursive(input, range_b, index + 1, output)
+                } else if let (range_a, None) = combination {
+                    // Successful combination
+                    Self::reduce_recursive(input, range_a, index + 1, output)
+                } else {
+                    unreachable!()
+                }
+            }
+        }
+    }
+
+    pub fn reduce(mut ranges: Vec<Self>) -> Vec<Self> {
+        let mut output = Vec::with_capacity(ranges.len());
+        // Sort the ranges to start
+        ranges.sort_by(|a, b| a.start.cmp(&b.start));
+        if !ranges.is_empty() {
+            let first = ranges[0].clone();
+            Self::reduce_recursive(ranges, first, 1, &mut output);
+        }
+        output
     }
 }
 

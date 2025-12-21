@@ -4,21 +4,12 @@
 
 use super::Solution;
 use crate::itertools::*;
+use crate::types::RangeInclusive;
 use crate::utils;
 
-struct IdRange {
-    start: u64,
-    end: u64,
-}
-
-impl From<&str> for IdRange {
-    fn from(value: &str) -> Self {
-        let (start, end) = utils::split(value, "-").unwrap();
-        Self {
-            start: start.parse().unwrap(),
-            end: end.parse().unwrap(),
-        }
-    }
+fn parse_range(value: &str) -> RangeInclusive<u64> {
+    let (start, end) = utils::split(value, "-").unwrap();
+    RangeInclusive::new(start.parse().unwrap(), end.parse().unwrap())
 }
 
 fn extract_digits(number: u64, count: u32, offset: u32) -> u64 {
@@ -58,7 +49,7 @@ pub fn solve(input: String) -> Solution {
     let mut solution = Solution::new();
     // One of the younger Elves was playing on a gift shop computer and managed to add a whole
     // bunch of invalid product IDs to their gift shop database!
-    let product_ids = input.split(',').map(IdRange::from).collect::<Vec<_>>();
+    let product_ids = input.split(',').map(parse_range).collect::<Vec<_>>();
 
     // Part A: You can find the invalid IDs by looking for any ID which is made only of some
     // sequence of digits repeated twice. What do you get if you add up all of the invalid IDs?
