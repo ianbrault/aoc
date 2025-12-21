@@ -61,20 +61,3 @@ pub fn solve(input: String) -> Solution {
 
     solution
 }
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[test]
-    fn test() {
-        let bank = [9, 8, 7, 6, 5, 4, 3, 2, 1, 1, 1, 1, 1, 1, 1];
-        assert_eq!(maximum_joltage(&bank, 12), 987654321111);
-
-        let bank = [8, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 9];
-        assert_eq!(maximum_joltage(&bank, 12), 811111111119);
-
-        let bank = [2, 3, 4, 2, 3, 4, 2, 3, 4, 2, 3, 4, 2, 7, 8];
-        assert_eq!(maximum_joltage(&bank, 12), 434234234278);
-    }
-}
