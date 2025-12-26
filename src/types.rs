@@ -195,7 +195,7 @@ impl TryFrom<&str> for Point3D {
     }
 }
 
-#[derive(Clone, PartialEq)]
+#[derive(Clone, Eq, Hash, PartialEq)]
 pub struct Line {
     pub p0: Point,
     pub p1: Point,
