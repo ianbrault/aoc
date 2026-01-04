@@ -18,18 +18,20 @@ impl Rectangle {
         let area = ((b.x - a.x).abs() + 1) * ((b.y - a.y).abs() + 1);
         let x = RangeInclusive::new(cmp::min(a.x, b.x), cmp::max(a.x, b.x));
         let y = RangeInclusive::new(cmp::min(a.y, b.y), cmp::max(a.y, b.y));
-        Self {
-            area,
-            x,
-            y,
-        }
+        Self { area, x, y }
     }
 
     fn contains_line(&self, line: &Line) -> bool {
         if line.is_horizontal() {
-            line.p0.y > self.y.start && line.p0.y < self.y.end && line.p0.x <= self.x.end && line.p1.x >= self.x.start
+            line.p0.y > self.y.start
+                && line.p0.y < self.y.end
+                && line.p0.x <= self.x.end
+                && line.p1.x >= self.x.start
         } else if line.is_vertical() {
-            line.p0.x > self.x.start && line.p0.x < self.x.end && line.p0.y <= self.y.end && line.p1.y >= self.y.start
+            line.p0.x > self.x.start
+                && line.p0.x < self.x.end
+                && line.p0.y <= self.y.end
+                && line.p1.y >= self.y.start
         } else {
             unreachable!()
         }
