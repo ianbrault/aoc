@@ -3,247 +3,102 @@
 */
 
 use super::Solution;
+use crate::itertools::*;
 
 use std::cmp;
-use std::collections::VecDeque;
+use std::collections::HashMap;
 
-const JOLTAGE_COUNT: usize = 10;
-
-#[derive(Clone)]
-struct JoltageList([u16; JOLTAGE_COUNT + 1]);
-
-impl JoltageList {
-    fn get(&self, i: usize) -> u16 {
-        self.0[i + 1]
-    }
-
-    fn decrement(&mut self, i: usize, by: u16) {
-        self.0[i + 1] -= by;
-    }
-
-    fn iter(&self) -> impl Iterator<Item = &u16> {
-        self.0.iter().skip(1).take(self.0[0] as usize)
-    }
-}
-
-impl From<Vec<u16>> for JoltageList {
-    fn from(value: Vec<u16>) -> Self {
-        assert!(value.len() <= JOLTAGE_COUNT);
-        let mut inner = [0; JOLTAGE_COUNT + 1];
-        inner[0] = value.len() as u16;
-        for (i, v) in value.into_iter().enumerate() {
-            inner[i + 1] = v;
-        }
-        Self(inner)
-    }
-}
-
-struct ButtonPressCombinations {
-    combinations: Vec<u16>,
-    maxima: Vec<u16>,
-}
-
-impl ButtonPressCombinations {
-    fn distribute_presses(mut m: u16, maxima: &[u16], combinations: &mut Vec<u16>) {
-        for (i, slot) in combinations.iter_mut().enumerate().rev() {
-            let value = cmp::min(m, maxima[i]);
-            *slot = value;
-            m -= value;
-            if m == 0 {
-                break;
-            }
-        }
-        if m != 0 {
-            combinations.clear();
-        }
-    }
-
-    fn new(n: usize, m: u16, maxima: Vec<u16>) -> Self {
-        let mut combinations = vec![0; n];
-        Self::distribute_presses(m, &maxima, &mut combinations);
-        Self {
-            combinations,
-            maxima,
-        }
-    }
-}
-
-impl Iterator for ButtonPressCombinations {
-    type Item = Vec<u16>;
-
-    fn next(&mut self) -> Option<Self::Item> {
-        if self.combinations.is_empty() {
-            return None;
-        }
-        let combo = self.combinations.clone();
-
-        let mut i = self.combinations.iter().rposition(|v| *v != 0).unwrap();
-        let mut distribution = 0;
-        loop {
-            if i == 0 {
-                self.combinations.clear();
-                break;
-            }
-            distribution += self.combinations[i] - 1;
-            self.combinations[i - 1] += 1;
-            self.combinations[i] = 0;
-            i -= 1;
-            if self.combinations[i] <= self.maxima[i] {
-                break;
-            }
-        }
-        Self::distribute_presses(distribution, &self.maxima, &mut self.combinations);
-
-        Some(combo)
-    }
-}
+type Button = Vec<usize>;
+type JoltageList = Vec<i16>;
+type Lights = u16;
 
 struct Machine {
-    indicator_lights: u16,
-    button_wiring: Vec<Vec<u8>>,
+    indicator_lights: Lights,
+    button_combinations: HashMap<Lights, Vec<Vec<Button>>>,
     joltage_requirements: JoltageList,
 }
 
 impl Machine {
-    fn press_button_lights(&self, index: usize, state: u16) -> u16 {
-        let mut next = state;
-        for &i in self.button_wiring[index].iter() {
-            next ^= 1 << i;
-        }
-        next
+    fn bifurcate(joltages: &JoltageList) -> JoltageList {
+        joltages.iter().map(|j| j / 2).collect()
     }
 
-    fn fewest_button_presses_lights(&self) -> usize {
-        let mut queue = VecDeque::new();
-        queue.push_back((0, 0));
+    fn button_press_combinations(buttons: &[Vec<usize>]) -> HashMap<Lights, Vec<Vec<Button>>> {
+        let mut button_presses = HashMap::new();
 
-        while let Some((state, pushes)) = queue.pop_front() {
-            if state == self.indicator_lights {
-                return pushes;
-            }
-            for index in 0..self.button_wiring.len() {
-                let next_state = self.press_button_lights(index, state);
-                if next_state != 0 {
-                    queue.push_back((next_state, pushes + 1));
-                }
-            }
-        }
-        unreachable!()
-    }
-
-    fn press_button_joltages(&self, button_index: usize, count: u16, state: &mut JoltageList) {
-        for i in self.button_wiring[button_index].iter() {
-            state.decrement(*i as usize, count);
-        }
-    }
-
-    fn wiring_count(&self, joltage_index: usize, button_mask: u16) -> usize {
-        self.button_wiring
-            .iter()
-            .enumerate()
-            .map(|(i, wiring)| {
-                if button_mask & (1 << i) != 0 {
-                    wiring
-                        .iter()
-                        .filter(|&&i| i as usize == joltage_index)
-                        .count()
-                } else {
-                    0
-                }
-            })
-            .sum()
-    }
-
-    fn fewest_button_presses_joltages_rec(
-        &self,
-        state: JoltageList,
-        button_mask: u16,
-        pushes: usize,
-        current_best: &mut usize,
-    ) -> Option<usize> {
-        if state.iter().all(|&joltage| joltage == 0) {
-            *current_best = pushes;
-            return Some(pushes);
-        }
-        if pushes >= *current_best {
-            return None;
-        }
-
-        // Find the output joltage with the fewest number of buttons wired to it
-        let (joltage_index, joltage) = state
-            .iter()
-            .enumerate()
-            .filter(|(_, j)| **j > 0)
-            .min_by_key(|(i, j)| (self.wiring_count(*i, button_mask), -(**j as i32)))
-            .unwrap();
-
-        let mut button_indices = Vec::new();
-        for i in 0..self.button_wiring.len() {
-            if button_mask & (1 << i) != 0 && self.button_wiring[i].contains(&(joltage_index as u8))
-            {
-                button_indices.push(i);
-            }
-        }
-        // Find the maximum number of presses for each button
-        let mut maximum_presses = vec![0; button_indices.len()];
-        for (i, button_index) in button_indices.iter().enumerate() {
-            maximum_presses[i] = u16::MAX;
-            for j in self.button_wiring[*button_index].iter() {
-                maximum_presses[i] = cmp::min(maximum_presses[i], state.get(*j as usize));
-            }
-        }
-
-        if button_indices.is_empty() {
-            None
-        } else {
-            // Remove buttons affecting the current joltage from the mask
-            let mut next_button_mask = button_mask;
-            for button_index in button_indices.iter() {
-                next_button_mask ^= 1 << button_index;
-            }
-
-            // Recurse over different combinations of button presses
-            ButtonPressCombinations::new(button_indices.len(), *joltage, maximum_presses)
-                .filter_map(|press_counts| {
-                    let mut next_state = state.clone();
-                    let mut next_pushes = pushes;
-                    for (i, count) in press_counts.into_iter().enumerate() {
-                        self.press_button_joltages(button_indices[i], count, &mut next_state);
-                        next_pushes += count as usize;
+        for count in 0..=buttons.len() {
+            for buttons in buttons.iter().combinations(count) {
+                let mut lights = 0;
+                for button in buttons.iter() {
+                    for i in button.iter() {
+                        lights ^= 1 << i;
                     }
-                    self.fewest_button_presses_joltages_rec(
-                        next_state,
-                        next_button_mask,
-                        next_pushes,
-                        current_best,
-                    )
-                })
-                .min()
+                }
+                let entry = button_presses.entry(lights).or_insert(Vec::new());
+                entry.push(buttons.into_iter().cloned().collect());
+            }
         }
+
+        button_presses
     }
 
-    fn fewest_button_presses_joltages(&self) -> Option<usize> {
-        let mut button_mask = 0;
-        for i in 0..self.button_wiring.len() {
-            button_mask |= 1 << i;
-        }
-        let mut current_best = usize::MAX;
+    fn configure_lights(&self) -> usize {
+        self.button_combinations[&self.indicator_lights]
+            .iter()
+            .map(|presses| presses.len())
+            .min()
+            .unwrap()
+    }
 
-        self.fewest_button_presses_joltages_rec(
-            self.joltage_requirements.clone(),
-            button_mask,
-            0,
-            &mut current_best,
-        )
+    fn configure_joltages(&self, joltages: JoltageList) -> Option<usize> {
+        // Solution cribbed from https://www.reddit.com/r/adventofcode/comments/1pk87hl/2025_day_10_part_2_bifurcate_your_way_to_victory/
+        if joltages.iter().all(|j| *j == 0) {
+            return Some(0);
+        }
+
+        let mut parity = 0;
+        for (i, j) in joltages.iter().enumerate() {
+            parity |= (*j as u16 & 1) << i;
+        }
+
+        let mut solution = None;
+        for buttons in self
+            .button_combinations
+            .get(&parity)
+            .unwrap_or(&Vec::new())
+            .iter()
+        {
+            let mut next_joltages = joltages.clone();
+            for button in buttons {
+                for i in button {
+                    next_joltages[*i] -= 1;
+                }
+            }
+            if next_joltages.iter().any(|j| *j < 0) {
+                continue;
+            }
+
+            // Bifurcate and recurse
+            let joltages_halved = Self::bifurcate(&next_joltages);
+            if let Some(presses) = self.configure_joltages(joltages_halved) {
+                let total_presses = buttons.len() + (2 * presses);
+                solution = if solution.is_none() {
+                    Some(total_presses)
+                } else {
+                    solution.map(|p| cmp::min(p, total_presses))
+                };
+            }
+        }
+        solution
     }
 }
 
 impl From<&str> for Machine {
     fn from(value: &str) -> Self {
-        let mut parts = value.split_ascii_whitespace().collect::<VecDeque<_>>();
+        let parts = value.split_ascii_whitespace().collect::<Vec<_>>();
 
-        let indicator_diagram = parts.pop_front().unwrap();
         let mut indicator_lights = 0;
+        let indicator_diagram = parts.first().unwrap();
         for (i, c) in indicator_diagram[1..(indicator_diagram.len() - 1)]
             .chars()
             .enumerate()
@@ -253,27 +108,31 @@ impl From<&str> for Machine {
             }
         }
 
-        let joltage_list = parts.pop_back().unwrap();
-        let joltage_requirements_vec = joltage_list[1..(joltage_list.len() - 1)]
-            .split(',')
-            .map(|joltage| joltage.parse().unwrap())
-            .collect::<Vec<_>>();
-        let joltage_requirements = JoltageList::from(joltage_requirements_vec);
-
-        let button_wiring = parts
-            .into_iter()
+        let button_wiring = parts[1..(parts.len() - 1)]
+            .iter()
             .map(|wiring| {
                 wiring[1..(wiring.len() - 1)]
                     .split(',')
-                    .map(|index| index.parse().unwrap())
-                    .collect::<Vec<_>>()
+                    .map(|n| n.parse().unwrap())
+                    .collect()
             })
             .collect::<Vec<_>>();
+        // Pre-compute the possible button press combinations
+        let mut button_combinations = Self::button_press_combinations(&button_wiring);
+        // Ensure the zero-press combination shows up for no lights
+        let entry = button_combinations.entry(0).or_insert(Vec::new());
+        entry.insert(0, Vec::new());
+
+        let joltage_list = parts.last().unwrap();
+        let joltage_requirements = joltage_list[1..(joltage_list.len() - 1)]
+            .split(',')
+            .map(|joltage| joltage.parse().unwrap())
+            .collect();
 
         Self {
             indicator_lights,
+            button_combinations,
             joltage_requirements,
-            button_wiring,
         }
     }
 }
@@ -288,20 +147,20 @@ pub fn solve(input: String) -> Solution {
     // Part A: Analyze each machine's indicator light diagram and button wiring schematics. What is
     // the fewest button presses required to correctly configure the indicator lights on all of
     // the machines?
-    let button_presses_lights = machines
+    let button_presses = machines
         .iter()
-        .map(|machine| machine.fewest_button_presses_lights())
+        .map(|machine| machine.configure_lights())
         .sum::<usize>();
-    solution.set_part_a(button_presses_lights);
+    solution.set_part_a(button_presses);
 
     // Part B: Analyze each machine's joltage requirements and button wiring schematics. What is
     // the fewest button presses required to correctly configure the joltage level counters on all
     // of the machines?
-    let button_presses_joltages = machines
+    let joltage_presses = machines
         .iter()
-        .filter_map(|machine| machine.fewest_button_presses_joltages())
+        .filter_map(|machine| machine.configure_joltages(machine.joltage_requirements.clone()))
         .sum::<usize>();
-    solution.set_part_b(button_presses_joltages);
+    solution.set_part_b(joltage_presses);
 
     solution
 }
