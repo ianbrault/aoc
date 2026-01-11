@@ -216,15 +216,6 @@ where
     type Item = Vec<T>;
 
     fn next(&mut self) -> Option<Self::Item> {
-        /*
-        if self.c.is_empty() {
-            return None;
-        } else if self.done {
-            let output = self.c.clone();
-            self.c.clear();
-            return Some(output);
-        }
-        */
         if self.c.is_empty() || self.done {
             self.c.clear();
             return None;
