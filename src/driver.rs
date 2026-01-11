@@ -57,6 +57,9 @@ pub fn run_puzzles(year: Option<usize>, day: Option<usize>, sample: bool) {
 }
 
 pub fn run_benchmark(iterations: usize) {
+    // TODO: remove when solutions are no longer incomplete
+    let incomplete = vec![2020, 2021, 2022, 2023];
+
     // Run puzzle benchmarks
     let mut benchmark = HashMap::new();
     for _ in 0..iterations {
@@ -80,7 +83,11 @@ pub fn run_benchmark(iterations: usize) {
         iterations
     );
     for year in PuzzleIterator::all().map(|puzzle| puzzle.year).dedup() {
-        println!("### {}\n", year);
+        if incomplete.contains(&year) {
+            println!("### {} (incomplete)\n", year);
+        } else {
+            println!("### {}\n", year);
+        }
         println!("| Puzzle | Time (ms) |");
         println!("|:---|---:|");
         for puzzle in PuzzleIterator::all() {
